@@ -330,6 +330,24 @@
     display: block;
   }
 
+  .copyright {
+    font-size: 0.75rem;
+    color: var(--overlay0);
+    white-space: nowrap;
+  }
+
+  .copyright a {
+    color: var(--overlay1);
+    text-decoration: none;
+  }
+
+  .copyright a:hover { color: var(--text); }
+
+  .footer-copyright {
+    position: absolute;
+    right: 20px;
+  }
+
   .thumb-wrap {
     position: relative;
     width: 68px;
