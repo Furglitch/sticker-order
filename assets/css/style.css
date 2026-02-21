@@ -399,7 +399,7 @@
     align-self: stretch;
     opacity: 0.7;
     transition: background 0.25s;
-    display: none; /* using border-left instead */
+    display: none;
   }
 
   .section-block {

@@ -1,0 +1,74 @@
+---
+layout: null
+title: Artist Dashboard
+permalink: /artist/
+---
+<!DOCTYPE html>
+<html lang="en" data-theme="mocha">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Artist Dashboard — Sticker Brief</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+<link rel="stylesheet" href="{{ '/assets/css/artist.css' | relative_url }}">
+</head>
+<body>
+
+<div class="artist-layout">
+  <aside id="artist-sidebar">
+    <div class="sidebar-header">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <span class="sidebar-title">🎨 Commissions</span>
+        <div class="theme-toggle" onclick="artistToggleTheme()" title="Toggle light/dark" role="button" aria-label="Toggle theme">
+          <div class="toggle-thumb"></div>
+          <div class="toggle-icons"><span>☀️</span><span>🌙</span></div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-sm" style="width:100%;" onclick="document.getElementById('import-input').click()">
+        ＋ Import Brief (.json)
+      </button>
+    </div>
+    <div id="commission-list"></div>
+  </aside>
+  <div class="artist-main">
+    <div class="artist-topbar">
+      <button class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Toggle commissions list">☰</button>
+      <span class="topbar-icon">🖼</span>
+      <span id="commission-title">Artist Dashboard</span>
+    </div>
+    <div id="stats-bar"></div>
+    <div id="commission-main" style="display:none;">
+      <div class="commission-content">
+        <div id="meta-block"></div>
+        <div id="sections-container"></div>
+      </div>
+    </div>
+    <div id="main-empty">
+      <div class="empty-icon">📭</div>
+      <p>No commission selected.<br>Import a customer's <strong>.json</strong> brief using the sidebar, or select one from your list.</p>
+    </div>
+
+  </div>
+</div>
+<div id="artist-lightbox" onclick="closeArtistLightbox()">
+  <img id="artist-lightbox-img" src="" alt="">
+</div>
+<div id="artist-toast"></div>
+<input type="file" id="import-input" accept=".json" multiple style="display:none">
+
+<script src="{{ '/assets/js/artist/state.js'  | relative_url }}"></script>
+<script src="{{ '/assets/js/artist/data.js'   | relative_url }}"></script>
+<script src="{{ '/assets/js/artist/ui.js'     | relative_url }}"></script>
+<script>
+  function artistToggleTheme() {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'latte' ? 'mocha' : 'latte';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('stickerBriefTheme', next);
+  }
+</script>
+<script src="{{ '/assets/js/artist/init.js'   | relative_url }}"></script>
+
+</body>
+</html>

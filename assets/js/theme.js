@@ -8,7 +8,6 @@ function setTheme(theme) {
   localStorage.setItem('stickerBriefTheme', theme);
 }
 
-// Restore saved preference (or fall back to Mocha).
 (function () {
   const saved = localStorage.getItem('stickerBriefTheme');
   setTheme(saved === 'latte' ? 'latte' : 'mocha');

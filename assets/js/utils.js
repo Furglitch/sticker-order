@@ -17,7 +17,6 @@ function showToast(msg) {
 }
 
 function sectionLetter(i) {
-  // A–Z, then AA, AB, …
   const L = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   if (i < 26) return L[i];
   return L[Math.floor(i / 26) - 1] + L[i % 26];

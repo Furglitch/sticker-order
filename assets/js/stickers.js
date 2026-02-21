@@ -137,13 +137,11 @@ function updateStickerFlag(sid, cid, flag, val) {
   const s = sec.stickers.find(x => x.id === cid);
   if (!s) return;
   s[flag] = val;
-  // Update label active state.
   const card = document.querySelector(`.sticker-card[data-cid="${cid}"]`);
   if (!card) return;
   const labelMap = { nsfw: 'flag-nsfw', ych: 'flag-ych', multiChar: 'flag-multi' };
   const label = card.querySelector('.' + labelMap[flag]);
   if (label) label.classList.toggle('active', val);
-  // Show/hide character count input.
   if (flag === 'multiChar') {
     const wrap = document.getElementById(`charcount-${cid}`);
     if (wrap) wrap.classList.toggle('visible', val);
