@@ -3,7 +3,7 @@ function importCommission(file) {
   reader.onload = e => {
     try {
       const json = JSON.parse(e.target.result);
-      if (!json.meta || !json.sections) throw new Error('Invalid brief format');
+      if (!json.meta || !json.sections) throw new Error('Invalid Sticker Order Sheet format');
 
       const id = generateId();
       const sections = (json.sections || []).map(sec => ({
@@ -26,7 +26,7 @@ function importCommission(file) {
       renderAll();
       showArtistToast(`Imported "${json.meta.packName || 'Untitled'}"`);
     } catch (err) {
-      showArtistToast('Error reading brief: ' + err.message);
+      showArtistToast('Error reading Sticker Order Sheet: ' + err.message);
     }
   };
   reader.readAsText(file);

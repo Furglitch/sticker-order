@@ -8,7 +8,7 @@
   });
 
   (function () {
-    const saved = localStorage.getItem('stickerBriefTheme');
+    const saved = localStorage.getItem('stickerOrderSheetTheme');
     const theme = saved === 'latte' ? 'latte' : 'mocha';
     document.documentElement.setAttribute('data-theme', theme);
   })();

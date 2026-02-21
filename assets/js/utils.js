@@ -6,7 +6,7 @@ function escHtml(str) {
 }
 
 function slugify(str) {
-  return str.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'brief';
+  return str.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'sticker-order-sheet';
 }
 
 function showToast(msg) {

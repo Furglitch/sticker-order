@@ -5,10 +5,10 @@ function toggleTheme() {
 
 function setTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem('stickerBriefTheme', theme);
+  localStorage.setItem('stickerOrderSheetTheme', theme);
 }
 
 (function () {
-  const saved = localStorage.getItem('stickerBriefTheme');
+  const saved = localStorage.getItem('stickerOrderSheetTheme');
   setTheme(saved === 'latte' ? 'latte' : 'mocha');
 })();

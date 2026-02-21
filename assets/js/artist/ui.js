@@ -12,7 +12,7 @@ function renderSidebar() {
   if (!commissions.length) {
     list.innerHTML = `<div class="sidebar-empty">
       <span style="font-size:2rem;">📭</span>
-      <p>No commissions yet.<br>Import a brief to get started.</p>
+      <p>No commissions yet.<br>Import a Sticker Order Sheet to get started.</p>
     </div>`;
     return;
   }

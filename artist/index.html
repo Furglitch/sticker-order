@@ -8,7 +8,7 @@ permalink: /artist/
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Artist Dashboard — Sticker Brief</title>
+<title>🎨 Artist Dashboard — Order Sheet</title>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
 <link rel="stylesheet" href="{{ '/assets/css/artist.css' | relative_url }}">
@@ -26,7 +26,7 @@ permalink: /artist/
         </div>
       </div>
       <button class="btn btn-primary btn-sm" style="width:100%;" onclick="document.getElementById('import-input').click()">
-        ＋ Import Brief (.json)
+        ＋ Import Order Sheet (.json)
       </button>
     </div>
     <div id="commission-list"></div>
@@ -52,7 +52,7 @@ permalink: /artist/
     </div>
     <div id="main-empty">
       <div class="empty-icon">📭</div>
-      <p>No commission selected.<br>Import a customer's <strong>.json</strong> brief using the sidebar, or select one from your list.</p>
+      <p>No commission selected.<br>Import a customer's <strong>.json</strong> Sticker Order Sheet using the sidebar, or select one from your list.</p>
     </div>
 
   </div>
@@ -71,7 +71,7 @@ permalink: /artist/
     const cur = document.documentElement.getAttribute('data-theme');
     const next = cur === 'latte' ? 'mocha' : 'latte';
     document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('stickerBriefTheme', next);
+    localStorage.setItem('stickerOrderSheetTheme', next);
   }
 </script>
 <script src="{{ '/assets/js/artist/init.js'   | relative_url }}"></script>

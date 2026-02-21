@@ -3,7 +3,7 @@
 This is a simple web app for artists and customers to use when placing sticker orders.
 
 ## Customer-Side Features
-Customers can use this app to create a detailed brief for their sticker commission orders.
+Customers can use this app to fill out a Sticker Order Form for their sticker commission orders.
 
 - Split stickers into sections, for example by theme or character
 - Specify details for each sticker:
@@ -16,7 +16,7 @@ Customers can use this app to create a detailed brief for their sticker commissi
 - Images can be uploaded via drag-and-drop, with a lightbox preview (click to enlarge).
 
 ## Artist-Side Features
-Artists can use this app to easily view briefs sent by customers.
+Artists can use this app to easily view Sticker Order Sheets sent by customers.
 
 - View sticker details in a clear, organised format
 - View reference images in a lightbox preview

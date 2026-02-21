@@ -27,7 +27,7 @@ function exportJSON() {
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href     = url;
-  a.download = `${slugify(data.meta.packName || 'sticker-brief')}-draft.json`;
+  a.download = `${slugify(data.meta.packName || 'sticker-order-sheet')}.json`;
   a.click();
   URL.revokeObjectURL(url);
   showToast('Draft saved!');
