@@ -1,0 +1,7 @@
+title: Sticker Commission Order Form
+description: A commission order form for Telegram sticker packs.
+plugins: []
+
+exclude:
+  - README.md
+  - .gitignore
