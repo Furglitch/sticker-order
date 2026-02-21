@@ -170,6 +170,8 @@
   transition: background 0.25s, border-color 0.25s;
 }
 
+.artist-topbar .github-link { margin-left: auto; }
+
 .topbar-icon {
   font-size: 1.5rem;
   line-height: 1;
