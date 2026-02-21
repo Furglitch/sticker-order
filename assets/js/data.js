@@ -10,7 +10,19 @@ function collectMeta() {
 }
 
 function exportJSON() {
-  const data = { meta: collectMeta(), sections };
+  const data = { 
+    meta: collectMeta(), 
+    sections: sections.map(sec => ({
+      ...sec,
+      stickers: sec.stickers.map(s => {
+        const sticker = { ...s };
+        if (!sticker.multiChar) {
+          delete sticker.charCount;
+        }
+        return sticker;
+      })
+    }))
+  };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');

@@ -137,6 +137,20 @@ function updateStickerFlag(sid, cid, flag, val) {
   const s = sec.stickers.find(x => x.id === cid);
   if (!s) return;
   s[flag] = val;
+  
+  if (flag === 'ych' && val && !s.multiChar) {
+    s.multiChar = true;
+    const card = document.querySelector(`.sticker-card[data-cid="${cid}"]`);
+    if (card) {
+      const multiLabel = card.querySelector('.flag-multi');
+      const multiCheckbox = card.querySelector('.flag-multi input[type="checkbox"]');
+      const wrap = document.getElementById(`charcount-${cid}`);
+      if (multiLabel) multiLabel.classList.add('active');
+      if (multiCheckbox) multiCheckbox.checked = true;
+      if (wrap) wrap.classList.add('visible');
+    }
+  }
+  
   const card = document.querySelector(`.sticker-card[data-cid="${cid}"]`);
   if (!card) return;
   const labelMap = { nsfw: 'flag-nsfw', ych: 'flag-ych', multiChar: 'flag-multi' };
@@ -145,6 +159,11 @@ function updateStickerFlag(sid, cid, flag, val) {
   if (flag === 'multiChar') {
     const wrap = document.getElementById(`charcount-${cid}`);
     if (wrap) wrap.classList.toggle('visible', val);
+    if (!val) {
+      s.charCount = 2;
+      const input = wrap?.querySelector('input[type="number"]');
+      if (input) input.value = '2';
+    }
   }
 }
 
