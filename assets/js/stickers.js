@@ -82,6 +82,11 @@ function renderStickerCard(sid, sticker) {
           <span class="drop-icon">🖼</span>
           <span class="drop-hint">Click or drag images here</span>
         </div>
+        <div class="url-input-row">
+          <input class="url-image-input" type="url" placeholder="Or paste an image URL…"
+            onkeydown="if(event.key==='Enter'&&this.value.trim()){addImageFromUrl(${sid},${sticker.id},this.value);this.value=''}">
+          <button class="btn btn-sm url-add-btn" onclick="const i=this.previousElementSibling;if(i.value.trim()){addImageFromUrl(${sid},${sticker.id},i.value);i.value=''}">Add</button>
+        </div>
         <div class="image-thumbnails" id="thumbs-${sticker.id}"></div>
         <input type="file" id="img-input-${sticker.id}" accept="image/*" multiple style="display:none"
           onchange="handleStickerImageInput(event,${sid},${sticker.id})">

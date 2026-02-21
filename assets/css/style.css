@@ -275,6 +275,34 @@
     margin-top: 10px;
   }
 
+  .url-input-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .url-image-input {
+    flex: 1;
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    border-radius: 7px;
+    border: 1.5px solid var(--surface2);
+    background: var(--base);
+    color: var(--text);
+    transition: border-color 0.2s;
+  }
+
+  .url-image-input:focus {
+    outline: none;
+    border-color: var(--peach);
+  }
+
+  .url-add-btn {
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    padding: 5px 12px;
+  }
+
   .thumb-wrap {
     position: relative;
     width: 68px;

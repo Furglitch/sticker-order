@@ -64,6 +64,11 @@ If you have multiple characters, it's recommended to create separate packs or se
           <span class="drop-icon">🖼</span>
           <span class="drop-hint">Click or drag character sheets / references here</span>
         </div>
+        <div class="url-input-row">
+          <input class="url-image-input" type="url" placeholder="Or paste an image URL…"
+            onkeydown="if(event.key==='Enter'&&this.value.trim()){addCharImageFromUrl(this.value);this.value=''}">
+          <button class="btn btn-sm url-add-btn" onclick="const i=this.previousElementSibling;if(i.value.trim()){addCharImageFromUrl(i.value);i.value=''}">Add</button>
+        </div>
         <div class="image-thumbnails" id="char-thumbs"></div>
         <input type="file" id="char-img-input" accept="image/*" multiple style="display:none"
           onchange="handleCharImageInput(event)">

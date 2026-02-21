@@ -149,3 +149,22 @@ function onDrop(e, sid, cid) {
     .filter(f => f.type.startsWith('image/'))
     .forEach(f => readImageFile(f, img => addStickerImage(sid, cid, img)));
 }
+
+function addImageFromUrl(sid, cid, url) {
+  url = url.trim();
+  if (!url) return;
+  const name = url.split('/').pop().split('?')[0] || 'image';
+  addStickerImage(sid, cid, { name, dataUrl: url });
+}
+
+function addCharImageFromUrl(url) {
+  url = url.trim();
+  if (!url) return;
+  const name = url.split('/').pop().split('?')[0] || 'image';
+  const img = { name, dataUrl: url };
+  charImages.push(img);
+  addThumb('char-thumbs', img, charImages.length - 1,
+    (wrapEl, imgIdx) => removeCharImage(imgIdx, wrapEl)
+  );
+  updateDropZoneHint('char-drop', charImages.length);
+}
