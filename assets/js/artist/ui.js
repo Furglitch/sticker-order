@@ -48,22 +48,22 @@ function renderStats() {
   const total    = stickers.length;
   const done     = stickers.filter(s => s.done).length;
 
-  // Flag counts.
-  const nsfw  = stickers.filter(s => s.nsfw).length;
-  const ych   = stickers.filter(s => s.ych).length;
-  const multi = stickers.filter(s => s.multiChar);
+  // Flag counts
+  const nsfw  = stickers.filter(s => s.nsfw && !s.ych && !s.multiChar).length;
+  const ych   = stickers.filter(s => s.ych && !s.nsfw && !s.multiChar).length;
+  const multi = stickers.filter(s => s.multiChar && !s.nsfw && !s.ych);
 
-  // Multi-char breakdown by charCount.
+  // Multi-char breakdown by charCount
   const multiCounts = {};
   multi.forEach(s => {
     const n = s.charCount || 2;
     multiCounts[n] = (multiCounts[n] || 0) + 1;
   });
 
-  // Combos.
-  const nsfwYch   = stickers.filter(s => s.nsfw  && s.ych).length;
-  const nsfwMulti = stickers.filter(s => s.nsfw  && s.multiChar).length;
-  const ychMulti  = stickers.filter(s => s.ych   && s.multiChar).length;
+  // Combos
+  const nsfwYch   = stickers.filter(s => s.nsfw  && s.ych && !s.multiChar).length;
+  const nsfwMulti = stickers.filter(s => s.nsfw  && s.multiChar && !s.ych).length;
+  const ychMulti  = stickers.filter(s => s.ych   && s.multiChar && !s.nsfw).length;
   const allThree  = stickers.filter(s => s.nsfw  && s.ych && s.multiChar).length;
 
   const pct = total ? Math.round((done / total) * 100) : 0;
@@ -209,7 +209,7 @@ function buildStickerCard(commId, sid, sticker) {
     <div class="artist-card-header">
       <label class="done-toggle" title="Mark as done">
         <input type="checkbox" class="done-checkbox" ${sticker.done ? 'checked' : ''}
-          onchange="toggleDone('${commId}','${sid}',${sticker.id})">
+          onchange="toggleDone('${commId}',${sid},${sticker.id})">
         <span class="done-check-ui"></span>
       </label>
       <span class="artist-card-num">
@@ -230,33 +230,33 @@ function buildStickerCard(commId, sid, sticker) {
     <div class="sticker-flags artist-flags">
       <label class="flag-item flag-nsfw${sticker.nsfw ? ' active' : ''}">
         <span class="sw"><input type="checkbox" ${sticker.nsfw ? 'checked' : ''}
-          onchange="setFlag('${commId}','${sid}',${sticker.id},'nsfw',this.checked)">
+          onchange="setFlag('${commId}',${sid},${sticker.id},'nsfw',this.checked)">
           <span class="sw-track"></span></span>
         NSFW
       </label>
       <label class="flag-item flag-ych${sticker.ych ? ' active' : ''}">
         <span class="sw"><input type="checkbox" ${sticker.ych ? 'checked' : ''}
-          onchange="setFlag('${commId}','${sid}',${sticker.id},'ych',this.checked)">
+          onchange="setFlag('${commId}',${sid},${sticker.id},'ych',this.checked)">
           <span class="sw-track"></span></span>
         YCH
       </label>
       <label class="flag-item flag-multi${sticker.multiChar ? ' active' : ''}">
         <span class="sw"><input type="checkbox" ${sticker.multiChar ? 'checked' : ''}
-          onchange="setFlag('${commId}','${sid}',${sticker.id},'multiChar',this.checked)">
+          onchange="setFlag('${commId}',${sid},${sticker.id},'multiChar',this.checked)">
           <span class="sw-track"></span></span>
         Multi-Character
       </label>
       <div class="char-count-wrap${sticker.multiChar ? ' visible' : ''}">
         <label>Characters:</label>
         <input class="char-count-input" type="number" min="2" max="99" value="${sticker.charCount || 2}"
-          oninput="setFlag('${commId}','${sid}',${sticker.id},'charCount',+this.value)">
+          oninput="setFlag('${commId}',${sid},${sticker.id},'charCount',+this.value)">
       </div>
     </div>
 
     <div class="artist-notes-row">
       <label class="area-label">Artist Notes</label>
       <textarea class="artist-notes-input" placeholder="Your private notes for this sticker…"
-        oninput="setArtistNotes('${commId}','${sid}',${sticker.id},this.value)">${escArtist(sticker.artistNotes || '')}</textarea>
+        oninput="setArtistNotes('${commId}',${sid},${sticker.id},this.value)">${escArtist(sticker.artistNotes || '')}</textarea>
     </div>`;
 
   return card;
