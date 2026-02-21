@@ -64,7 +64,14 @@ function renderStats() {
   const nsfwYch   = stickers.filter(s => s.nsfw  && s.ych && !s.multiChar).length;
   const nsfwMulti = stickers.filter(s => s.nsfw  && s.multiChar && !s.ych).length;
   const ychMulti  = stickers.filter(s => s.ych   && s.multiChar && !s.nsfw).length;
-  const allThree  = stickers.filter(s => s.nsfw  && s.ych && s.multiChar).length;
+
+  // All three — broken down by charCount
+  const allThreeCounts = {};
+  stickers.filter(s => s.nsfw && s.ych && s.multiChar).forEach(s => {
+    const n = s.charCount || 2;
+    allThreeCounts[n] = (allThreeCounts[n] || 0) + 1;
+  });
+  const allThreeTotal = Object.values(allThreeCounts).reduce((a, b) => a + b, 0);
 
   const pct = total ? Math.round((done / total) * 100) : 0;
 
@@ -77,6 +84,11 @@ function renderStats() {
   const multiPills = Object.entries(multiCounts)
     .sort(([a],[b]) => a - b)
     .map(([n, count]) => pill(`${n}-char`, count, 'green'))
+    .join('');
+
+  const allThreePills = Object.entries(allThreeCounts)
+    .sort(([a],[b]) => a - b)
+    .map(([n, count]) => pill(`All three ${n}×`, count, 'flamingo'))
     .join('');
 
   bar.innerHTML = `
@@ -94,8 +106,8 @@ function renderStats() {
       ${pill('NSFW+YCH', nsfwYch, 'maroon')}
       ${pill('NSFW+Multi', nsfwMulti, 'mauve')}
       ${pill('YCH+Multi', ychMulti, 'teal')}
-      ${pill('All three', allThree, 'flamingo')}
-      ${!nsfw && !ych && !multi.length ? '<span style="color:var(--overlay0);font-size:0.82rem;font-style:italic;">No flags set.</span>' : ''}
+      ${allThreePills}
+      ${!nsfw && !ych && !multi.length && !nsfwYch && !nsfwMulti && !ychMulti && !allThreeTotal ? '<span style="color:var(--overlay0);font-size:0.82rem;font-style:italic;">No flags set.</span>' : ''}
     </div>`;
 }
 

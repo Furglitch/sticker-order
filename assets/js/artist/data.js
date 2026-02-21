@@ -80,6 +80,7 @@ function toggleDone(commId, sid, cid) {
     if (cb) cb.checked = sticker.done;
   }
   renderStats();
+  renderSidebar();
 }
 
 function setFlag(commId, sid, cid, flag, val) {
@@ -113,7 +114,7 @@ function setFlag(commId, sid, cid, flag, val) {
   const card = document.querySelector(`.artist-card[data-cid="${cid}"]`);
   if (!card) return;
   const flagMap = { nsfw: 'flag-nsfw', ych: 'flag-ych', multiChar: 'flag-multi' };
-  const lbl = card.querySelector('.' + (flagMap[flag] || ''));
+  const lbl = flagMap[flag] ? card.querySelector('.' + flagMap[flag]) : null;
   if (lbl) lbl.classList.toggle('active', val);
   if (flag === 'multiChar') {
     const wrap = card.querySelector('.char-count-wrap');
