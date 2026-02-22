@@ -51,9 +51,11 @@ function renderStats() {
 
   const standard = stickers.filter(s => !s.nsfw && !s.ych && !s.multiChar).length;
 
+  const isNsfwFlat = ((artistData.rates || {}).nsfwMode || 'flat') !== 'per-char';
+
   const nsfwOnlyCounts = {};
   stickers.filter(s => s.nsfw && !s.ych && !s.multiChar).forEach(s => {
-    const n = s.nsfwCharCount || 1;
+    const n = isNsfwFlat ? 'flat' : (s.nsfwCharCount || 1);
     nsfwOnlyCounts[n] = (nsfwOnlyCounts[n] || 0) + 1;
   });
 
@@ -71,14 +73,14 @@ function renderStats() {
 
   const nsfwYchCounts = {};
   stickers.filter(s => s.nsfw && s.ych && !s.multiChar).forEach(s => {
-    const key = `${s.nsfwCharCount || 1}_${s.ychCount || 1}`;
+    const key = isNsfwFlat ? `${s.ychCount || 1}` : `${s.nsfwCharCount || 1}_${s.ychCount || 1}`;
     nsfwYchCounts[key] = (nsfwYchCounts[key] || 0) + 1;
   });
   const nsfwYchTotal = Object.values(nsfwYchCounts).reduce((a, b) => a + b, 0);
 
   const nsfwMultiCounts = {};
   stickers.filter(s => s.nsfw && s.multiChar && !s.ych).forEach(s => {
-    const key = `${s.nsfwCharCount || 1}_${s.charCount || 1}`;
+    const key = isNsfwFlat ? `${s.charCount || 1}` : `${s.nsfwCharCount || 1}_${s.charCount || 1}`;
     nsfwMultiCounts[key] = (nsfwMultiCounts[key] || 0) + 1;
   });
   const nsfwMultiTotal = Object.values(nsfwMultiCounts).reduce((a, b) => a + b, 0);
@@ -92,7 +94,9 @@ function renderStats() {
 
   const allThreeCounts = {};
   stickers.filter(s => s.nsfw && s.ych && s.multiChar).forEach(s => {
-    const key = `${s.nsfwCharCount || 1}_${s.ychCount || 1}_${s.charCount || 1}`;
+    const key = isNsfwFlat
+      ? `${s.ychCount || 1}_${s.charCount || 1}`
+      : `${s.nsfwCharCount || 1}_${s.ychCount || 1}_${s.charCount || 1}`;
     allThreeCounts[key] = (allThreeCounts[key] || 0) + 1;
   });
   const allThreeTotal = Object.values(allThreeCounts).reduce((a, b) => a + b, 0);
@@ -106,8 +110,8 @@ function renderStats() {
     </div>` : '';
 
   const nsfwPills = Object.entries(nsfwOnlyCounts)
-    .sort(([a],[b]) => a - b)
-    .map(([n, count]) => pill(`NSFW ${n}×`, count, 'red'))
+    .sort(([a],[b]) => a === 'flat' ? 0 : Number(a) - Number(b))
+    .map(([n, count]) => pill(isNsfwFlat ? 'NSFW' : `NSFW ${n}×`, count, 'red'))
     .join('');
 
   const ychPills = Object.entries(ychOnlyCounts)
@@ -121,13 +125,19 @@ function renderStats() {
     .join('');
 
   const nsfwYchPills = Object.entries(nsfwYchCounts)
-    .sort(([a],[b]) => { const [an,am]=a.split('_').map(Number),[bn,bm]=b.split('_').map(Number); return an-bn||am-bm; })
-    .map(([key, count]) => { const [nsfwN,ychN]=key.split('_'); return pill(`NSFW ${nsfwN}× + YCH ${ychN}×`, count, 'maroon'); })
+    .sort(([a],[b]) => { const [an,am]=a.split('_').map(Number),[bn,bm]=b.split('_').map(Number); return an-bn||(am||0)-(bm||0); })
+    .map(([key, count]) => {
+      if (isNsfwFlat) return pill(`NSFW + YCH ${key}×`, count, 'maroon');
+      const [nsfwN,ychN]=key.split('_'); return pill(`NSFW ${nsfwN}× + YCH ${ychN}×`, count, 'maroon');
+    })
     .join('');
 
   const nsfwMultiPills = Object.entries(nsfwMultiCounts)
-    .sort(([a],[b]) => { const [an,am]=a.split('_').map(Number),[bn,bm]=b.split('_').map(Number); return an-bn||am-bm; })
-    .map(([key, count]) => { const [nsfwN,multiN]=key.split('_'); return pill(`NSFW ${nsfwN}× + Add ${multiN}×`, count, 'mauve'); })
+    .sort(([a],[b]) => { const [an,am]=a.split('_').map(Number),[bn,bm]=b.split('_').map(Number); return an-bn||(am||0)-(bm||0); })
+    .map(([key, count]) => {
+      if (isNsfwFlat) return pill(`NSFW + Add ${key}×`, count, 'mauve');
+      const [nsfwN,multiN]=key.split('_'); return pill(`NSFW ${nsfwN}× + Add ${multiN}×`, count, 'mauve');
+    })
     .join('');
 
   const ychMultiPills = Object.entries(ychMultiCounts)
@@ -136,8 +146,11 @@ function renderStats() {
     .join('');
 
   const allThreePills = Object.entries(allThreeCounts)
-    .sort(([a],[b]) => { const [an,am,ak]=a.split('_').map(Number),[bn,bm,bk]=b.split('_').map(Number); return an-bn||am-bm||ak-bk; })
-    .map(([key, count]) => { const [nsfwN,ychN,multiN]=key.split('_'); return pill(`NSFW ${nsfwN}× + YCH ${ychN}× + Add ${multiN}×`, count, 'flamingo'); })
+    .sort(([a],[b]) => { const [an,am,ak]=a.split('_').map(Number),[bn,bm,bk]=b.split('_').map(Number); return an-bn||am-bm||(ak||0)-(bk||0); })
+    .map(([key, count]) => {
+      if (isNsfwFlat) { const [ychN,multiN]=key.split('_'); return pill(`NSFW + YCH ${ychN}× + Add ${multiN}×`, count, 'flamingo'); }
+      const [nsfwN,ychN,multiN]=key.split('_'); return pill(`NSFW ${nsfwN}× + YCH ${ychN}× + Add ${multiN}×`, count, 'flamingo');
+    })
     .join('');
 
   const nsfwOnlyTotal = Object.values(nsfwOnlyCounts).reduce((a, b) => a + b, 0);
@@ -340,7 +353,8 @@ function buildStickerCard(commId, sid, sticker) {
     const numInput = wrap.querySelector('input[type="number"]');
     checkbox.checked = !!val;
     numInput.value   = count;
-    if (val) { label.classList.add('active'); wrap.classList.add('visible'); }
+    const isNsfwFlatWrap = field === 'nsfw' && ((artistData.rates || {}).nsfwMode || 'flat') !== 'per-char';
+    if (val) { label.classList.add('active'); if (!isNsfwFlatWrap) wrap.classList.add('visible'); }
     checkbox.addEventListener('change', () => setFlag(commId, sid, sticker.id, field, checkbox.checked));
     numInput.addEventListener('input',  () => setFlag(commId, sid, sticker.id, countField, +numInput.value));
   });
@@ -353,10 +367,15 @@ function buildStickerCard(commId, sid, sticker) {
 }
 
 function buildTagPills(sticker) {
+  const nsfwFlat = ((artistData.rates || {}).nsfwMode || 'flat') !== 'per-char';
   const pills = [];
   if (sticker.nsfw) {
-    const n = sticker.nsfwCharCount || 1;
-    pills.push(`<span class="tag-pill tag-nsfw">NSFW ${n}×</span>`);
+    if (nsfwFlat) {
+      pills.push(`<span class="tag-pill tag-nsfw">NSFW</span>`);
+    } else {
+      const n = sticker.nsfwCharCount || 1;
+      pills.push(`<span class="tag-pill tag-nsfw">NSFW ${n}×</span>`);
+    }
   }
   if (sticker.ych) {
     const n = sticker.ychCount || 1;

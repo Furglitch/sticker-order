@@ -94,7 +94,8 @@ function setFlag(commId, sid, cid, flag, val) {
   if (lbl) lbl.classList.toggle('active', val);
   if (flag === 'nsfw') {
     const wrap = card.querySelector('[data-wrap="nsfw"]');
-    if (wrap) wrap.classList.toggle('visible', val);
+    const nsfwIsPerChar = ((artistData.rates || {}).nsfwMode || 'flat') === 'per-char';
+    if (wrap) wrap.classList.toggle('visible', val && nsfwIsPerChar);
     if (!val) {
       const comm = artistData.commissions[commId];
       if (comm) {
@@ -169,4 +170,23 @@ function setNsfwMode(mode) {
   saveState();
   renderRatesPanel();
   renderStats();
+  const isPerChar = mode === 'per-char';
+  document.querySelectorAll('.artist-card').forEach(card => {
+    const wrap = card.querySelector('[data-wrap="nsfw"]');
+    if (wrap) {
+      const checkbox = card.querySelector('.flag-nsfw input[type="checkbox"]');
+      wrap.classList.toggle('visible', isPerChar && !!checkbox?.checked);
+    }
+    const tagsEl = card.querySelector('.tag-pills-header');
+    const cid = card.dataset.cid;
+    if (tagsEl && cid) {
+      const comm = activeCommission();
+      if (comm) {
+        for (const sec of comm.sections) {
+          const sticker = sec.stickers.find(s => s.id === cid);
+          if (sticker) { tagsEl.innerHTML = buildTagPills(sticker); break; }
+        }
+      }
+    }
+  });
 }
