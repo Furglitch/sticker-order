@@ -20,7 +20,7 @@ function addSticker(sid, data = {}) {
   renderStickerCard(sid, sticker);
   refreshSectionEmptyState(sid);
   updateCountBadge();
-  if (!data.title) {
+  if (!data.title && !data.skipFocus) {
     setTimeout(() => {
       const el = document.querySelector(`.sticker-card[data-cid="${id}"] .card-title-input`);
       if (el) el.focus();
