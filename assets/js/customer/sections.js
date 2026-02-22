@@ -17,36 +17,27 @@ function addSection(data = {}) {
 }
 
 function renderSection(sec) {
-  const list     = document.getElementById('sections-list');
-  const idx      = sections.indexOf(sec);
-  const letter   = sectionLetter(idx);
+  const list      = document.getElementById('sections-list');
+  const idx       = sections.indexOf(sec);
   const accentIdx = idx % ACCENT_COUNT;
 
-  const el = document.createElement('div');
-  el.className      = 'section-block';
+  const el = document.getElementById('tmpl-section').content.cloneNode(true).firstElementChild;
   el.dataset.sid    = sec.id;
   el.dataset.accent = accentIdx;
 
-  el.innerHTML = `
-    <div class="section-head">
-      <span class="section-letter">${letter}</span>
-      <input class="section-label-input" type="text"
-        placeholder="Section name (e.g. Casual, Silly, Reactions…)"
-        value="${escHtml(sec.label)}"
-        oninput="updateSectionLabel(${sec.id}, this.value)">
-      <div class="section-actions">
-        <button class="icon-btn" title="Move section up"   onclick="moveSection(${sec.id},-1)">↑</button>
-        <button class="icon-btn" title="Move section down" onclick="moveSection(${sec.id}, 1)">↓</button>
-        <button class="icon-btn danger" title="Delete section" onclick="deleteSection(${sec.id})">✕</button>
-      </div>
-    </div>
-    <div class="section-body">
-      <div class="sticker-list" id="slist-${sec.id}"></div>
-      <div class="add-sticker-row">
-        <button class="btn btn-accent btn-sm" onclick="addSticker(${sec.id})">＋ Add Sticker</button>
-      </div>
-    </div>
-  `;
+  el.querySelector('.section-letter').textContent = sectionLetter(idx);
+
+  const labelInput = el.querySelector('.section-label-input');
+  labelInput.value = sec.label;
+  labelInput.addEventListener('input', () => updateSectionLabel(sec.id, labelInput.value));
+
+  const btns = el.querySelectorAll('.section-actions .icon-btn');
+  btns[0].addEventListener('click', () => moveSection(sec.id, -1));
+  btns[1].addEventListener('click', () => moveSection(sec.id,  1));
+  btns[2].addEventListener('click', () => deleteSection(sec.id));
+
+  el.querySelector('.sticker-list').id = `slist-${sec.id}`;
+  el.querySelector('.add-sticker-row .btn').addEventListener('click', () => addSticker(sec.id));
 
   list.appendChild(el);
   sec.stickers.forEach(s => renderStickerCard(sec.id, s));
@@ -89,9 +80,6 @@ function refreshSectionEmptyState(sid) {
   const old = list.querySelector('.section-empty');
   if (old) old.remove();
   if (sec.stickers.length === 0) {
-    const ph = document.createElement('div');
-    ph.className = 'section-empty';
-    ph.textContent = 'No stickers in this section yet.';
-    list.appendChild(ph);
+    list.appendChild(document.getElementById('tmpl-section-empty').content.cloneNode(true));
   }
 }

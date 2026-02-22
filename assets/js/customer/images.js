@@ -43,7 +43,7 @@ function updateDropZoneHint(dropId, count) {
     zone.style.padding   = '8px 14px';
   } else {
     zone.querySelector('.drop-hint').textContent =
-      dropId === 'char-drop' ? 'Click or drag character sheets / references here' : 'Click or drag images here';
+      dropId === 'char-drop' ? 'Click or drag general references here' : 'Click or drag images here';
     zone.style.minHeight = '80px';
     zone.style.padding   = '14px';
   }

@@ -10,6 +10,7 @@ title: Sticker Commission Form
 <title>🎨 Sticker Commission Form</title>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+<link rel="stylesheet" href="{{ '/assets/css/customer.css' | relative_url }}">
 </head>
 <body>
 
@@ -133,13 +134,106 @@ If you have multiple characters, it's recommended to create separate packs or se
 
 <input type="file" id="json-input"    accept=".json"   style="display:none" onchange="loadJSON(event)">
 
-<script src="{{ '/assets/js/state.js'    | relative_url }}"></script>
-<script src="{{ '/assets/js/utils.js'    | relative_url }}"></script>
-<script src="{{ '/assets/js/theme.js'    | relative_url }}"></script>
-<script src="{{ '/assets/js/images.js'   | relative_url }}"></script>
-<script src="{{ '/assets/js/stickers.js' | relative_url }}"></script>
-<script src="{{ '/assets/js/sections.js' | relative_url }}"></script>
-<script src="{{ '/assets/js/data.js'     | relative_url }}"></script>
-<script src="{{ '/assets/js/init.js'     | relative_url }}"></script>
+<template id="tmpl-section">
+  <div class="section-block">
+    <div class="section-head">
+      <span class="section-letter"></span>
+      <input class="section-label-input" type="text" placeholder="Section name (e.g. Casual, Silly, Reactions…)">
+      <div class="section-actions">
+        <button class="icon-btn" title="Move section up">↑</button>
+        <button class="icon-btn" title="Move section down">↓</button>
+        <button class="icon-btn danger" title="Delete section">✕</button>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="sticker-list"></div>
+      <div class="add-sticker-row">
+        <button class="btn btn-accent btn-sm">＋ Add Sticker</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="tmpl-sticker-card">
+  <div class="sticker-card">
+    <div class="card-header">
+      <span class="card-num"></span>
+      <input class="card-title-input" type="text" placeholder="Sticker name (e.g. Laughing, Sleepy, Heart Eyes…)">
+      <div class="card-actions">
+        <button class="icon-btn" title="Move up">↑</button>
+        <button class="icon-btn" title="Move down">↓</button>
+        <button class="icon-btn danger" title="Delete">✕</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-fields">
+        <div class="field">
+          <label>Expression / Emotion</label>
+          <input type="text" placeholder="e.g. big silly grin, crying laughing">
+        </div>
+        <div class="field">
+          <label>Pose / Action</label>
+          <input type="text" placeholder="e.g. holding coffee, peace sign, waving">
+        </div>
+        <div class="field">
+          <label>Notes</label>
+          <textarea placeholder="Text on sticker, background, accessories, special details…"></textarea>
+        </div>
+      </div>
+      <div>
+        <div class="area-label">Reference Images</div>
+        <div class="image-drop-zone">
+          <span class="drop-icon">🖼</span>
+          <span class="drop-hint">Click or drag images here</span>
+        </div>
+        <div class="url-input-row">
+          <input class="url-image-input" type="url" placeholder="Or paste an image URL…">
+          <button class="btn btn-sm url-add-btn">Add</button>
+        </div>
+        <div class="image-thumbnails"></div>
+        <input type="file" accept="image/*" multiple style="display:none">
+      </div>
+    </div>
+    <div class="sticker-flags">
+      <label class="flag-item flag-nsfw">
+        <span class="sw"><input type="checkbox"><span class="sw-track"></span></span>
+        NSFW
+      </label>
+      <div class="char-count-wrap">
+        <label>NSFW Characters:</label>
+        <input class="char-count-input" type="number" min="1" max="99" value="1">
+      </div>
+      <label class="flag-item flag-ych">
+        <span class="sw"><input type="checkbox"><span class="sw-track"></span></span>
+        YCH
+      </label>
+      <div class="char-count-wrap">
+        <label>Slots:</label>
+        <input class="char-count-input" type="number" min="1" max="99" value="1">
+      </div>
+      <label class="flag-item flag-multi">
+        <span class="sw"><input type="checkbox"><span class="sw-track"></span></span>
+        Additional Characters
+      </label>
+      <div class="char-count-wrap">
+        <label>Additional Characters:</label>
+        <input class="char-count-input" type="number" min="1" max="99" value="1">
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="tmpl-section-empty">
+  <div class="section-empty">No stickers in this section yet.</div>
+</template>
+
+<script src="{{ '/assets/js/theme.js'              | relative_url }}"></script>
+<script src="{{ '/assets/js/customer/state.js'    | relative_url }}"></script>
+<script src="{{ '/assets/js/customer/utils.js'    | relative_url }}"></script>
+<script src="{{ '/assets/js/customer/images.js'   | relative_url }}"></script>
+<script src="{{ '/assets/js/customer/stickers.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/customer/sections.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/customer/data.js'     | relative_url }}"></script>
+<script src="{{ '/assets/js/customer/init.js'     | relative_url }}"></script>
 </body>
 </html>

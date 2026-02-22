@@ -6,10 +6,4 @@
     Array.from(e.target.files).forEach(importCommission);
     e.target.value = '';
   });
-
-  (function () {
-    const saved = localStorage.getItem('stickerOrderSheetTheme');
-    const theme = saved === 'latte' ? 'latte' : 'mocha';
-    document.documentElement.setAttribute('data-theme', theme);
-  })();
 })();

@@ -6,17 +6,17 @@ function renderAll() {
 
 
 function renderSidebar() {
-  const list = document.getElementById('commission-list');
+  const list        = document.getElementById('commission-list');
+  const sideEmpty   = document.getElementById('sidebar-empty');
   const commissions = Object.values(artistData.commissions)
     .sort((a, b) => a.importedAt.localeCompare(b.importedAt));
 
   if (!commissions.length) {
-    list.innerHTML = `<div class="sidebar-empty">
-      <span style="font-size:2rem;">📭</span>
-      <p>No commissions yet.<br>Import a Sticker Order Sheet to get started.</p>
-    </div>`;
+    list.innerHTML   = '';
+    sideEmpty.hidden = false;
     return;
   }
+  sideEmpty.hidden = true;
 
   list.innerHTML = commissions.map(c => {
     const stickers = c.sections.flatMap(s => s.stickers);
@@ -49,34 +49,28 @@ function renderStats() {
   const total    = stickers.length;
   const done     = stickers.filter(s => s.done).length;
 
-  // Flag counts — each flag is independent; a sticker can appear in multiple buckets
   const standard = stickers.filter(s => !s.nsfw && !s.ych && !s.multiChar).length;
 
-  // ALL NSFW stickers, grouped by nsfwCharCount (includes combos)
   const nsfwOnlyCounts = {};
   stickers.filter(s => s.nsfw).forEach(s => {
     const n = s.nsfwCharCount || 1;
     nsfwOnlyCounts[n] = (nsfwOnlyCounts[n] || 0) + 1;
   });
 
-  // ALL YCH stickers, grouped by ychCount (includes combos)
   const ychOnlyCounts = {};
   stickers.filter(s => s.ych).forEach(s => {
     const n = s.ychCount || 1;
     ychOnlyCounts[n] = (ychOnlyCounts[n] || 0) + 1;
   });
 
-  // ALL multiChar stickers, grouped by charCount (includes combos)
   const multiOnlyCounts = {};
   stickers.filter(s => s.multiChar).forEach(s => {
     const n = s.charCount || 1;
     multiOnlyCounts[n] = (multiOnlyCounts[n] || 0) + 1;
   });
 
-  // NSFW+YCH (no multiChar)
   const nsfwYch = stickers.filter(s => s.nsfw && s.ych && !s.multiChar).length;
 
-  // NSFW+Add (no YCH), grouped by charCount
   const nsfwMultiCounts = {};
   stickers.filter(s => s.nsfw && s.multiChar && !s.ych).forEach(s => {
     const n = s.charCount || 1;
@@ -84,7 +78,6 @@ function renderStats() {
   });
   const nsfwMultiTotal = Object.values(nsfwMultiCounts).reduce((a, b) => a + b, 0);
 
-  // YCH+Add (no NSFW), grouped by charCount
   const ychMultiCounts = {};
   stickers.filter(s => s.ych && s.multiChar && !s.nsfw).forEach(s => {
     const n = s.charCount || 1;
@@ -92,7 +85,6 @@ function renderStats() {
   });
   const ychMultiTotal = Object.values(ychMultiCounts).reduce((a, b) => a + b, 0);
 
-  // All three flags, grouped by charCount
   const allThreeCounts = {};
   stickers.filter(s => s.nsfw && s.ych && s.multiChar).forEach(s => {
     const n = s.charCount || 1;
@@ -144,7 +136,6 @@ function renderStats() {
   const isEmpty = !standard && !nsfwOnlyTotal && !ychOnlyTotal && !multiOnlyTotal
                   && !nsfwYch && !nsfwMultiTotal && !ychMultiTotal && !allThreeTotal;
 
-  // Pricing total
   const hasRates = hasAnyRates();
   let totalHTML = '';
   if (hasRates) {
@@ -176,7 +167,6 @@ function renderStats() {
     </div>
     ${totalHTML}`;
 
-  // Update per-section price tags
   comm.sections.forEach(sec => {
     const el = document.getElementById(`sec-price-${sec.id}`);
     if (!el) return;
@@ -212,32 +202,40 @@ function renderMetaBlock(comm) {
   const el = document.getElementById('meta-block');
   const m  = comm.meta || {};
 
-  const row = (label, val) => val
-    ? `<div class="meta-row"><span class="meta-row-label">${label}</span><span class="meta-row-val">${escArtist(val)}</span></div>`
-    : '';
+  const block = document.getElementById('tmpl-meta-block').content.cloneNode(true).firstElementChild;
 
-  const charImgHTML = (m.charImages || []).length
-    ? `<div class="meta-row meta-row-images">
-        <span class="meta-row-label">Character Refs</span>
-        <div class="thumb-strip">${(m.charImages).map(img =>
-          `<img src="${img.dataUrl}" class="meta-thumb" alt="${escArtist(img.name)}" onclick="openArtistLightbox('${encodeURIComponent(img.dataUrl)}')">`
-        ).join('')}</div>
-      </div>`
-    : '';
+  const setRow = (key, val) => {
+    const row = block.querySelector(`[data-meta="${key}"]`);
+    if (!row) return;
+    if (!val) { row.remove(); return; }
+    row.querySelector('.meta-row-val').textContent = val;
+  };
 
-  el.innerHTML = `
-    <div class="meta-block panel">
-      <h2 class="block-heading">📋 Pack Details</h2>
-      ${row('Username', m.username)}
-      ${row('Character', m.character)}
-      ${row('Description', m.desc)}
-      ${row('Style', m.style)}
-      ${row('Notes', m.notes)}
-      ${charImgHTML}
-      <div class="meta-row"><span class="meta-row-label">Imported</span>
-        <span class="meta-row-val">${new Date(comm.importedAt).toLocaleDateString()}</span>
-      </div>
-    </div>`;
+  setRow('username',  m.username);
+  setRow('character', m.character);
+  setRow('desc',      m.desc);
+  setRow('notes',     m.notes);
+
+  const charImages = m.charImages || [];
+  if (!charImages.length) {
+    block.querySelector('[data-meta="charImages"]').remove();
+  } else {
+    const strip = block.querySelector('.thumb-strip');
+    charImages.forEach(img => {
+      const imgEl     = document.createElement('img');
+      imgEl.src       = img.dataUrl;
+      imgEl.className = 'meta-thumb';
+      imgEl.alt       = escArtist(img.name);
+      imgEl.addEventListener('click', () => openArtistLightbox(encodeURIComponent(img.dataUrl)));
+      strip.appendChild(imgEl);
+    });
+  }
+
+  block.querySelector('[data-meta="importedAt"] .meta-row-val').textContent =
+    new Date(comm.importedAt).toLocaleDateString();
+
+  el.innerHTML = '';
+  el.appendChild(block);
 }
 
 function renderSections(comm) {
@@ -247,116 +245,99 @@ function renderSections(comm) {
   const ACCENT_COLORS = ['--peach','--blue','--green','--mauve','--teal','--flamingo','--yellow','--lavender'];
 
   comm.sections.forEach((sec, si) => {
-    const letter     = sectionLetterArtist(si);
-    const accentVar  = ACCENT_COLORS[si % ACCENT_COLORS.length];
-    const total      = sec.stickers.length;
-    const done       = sec.stickers.filter(s => s.done).length;
+    const letter    = sectionLetterArtist(si);
+    const accentVar = ACCENT_COLORS[si % ACCENT_COLORS.length];
+    const total     = sec.stickers.length;
+    const done      = sec.stickers.filter(s => s.done).length;
+    const secPrice  = hasAnyRates() ? `$${calcSectionTotal(sec).toFixed(2)}` : '';
 
-    const secEl = document.createElement('div');
-    secEl.className = 'artist-section';
+    const secEl = document.getElementById('tmpl-artist-section').content.cloneNode(true).firstElementChild;
     secEl.style.setProperty('--accent', `var(${accentVar})`);
     secEl.style.borderLeftColor = `var(${accentVar})`;
 
-    const secPrice = hasAnyRates() ? `$${calcSectionTotal(sec).toFixed(2)}` : '';
+    const letterEl = secEl.querySelector('.section-letter');
+    letterEl.style.color = `var(${accentVar})`;
+    letterEl.textContent = letter;
 
-    secEl.innerHTML = `
-      <div class="artist-section-head">
-        <span class="section-letter" style="color:var(${accentVar})">${letter}</span>
-        <span class="artist-section-name">${escArtist(sec.label) || '<em style="opacity:.5">Untitled Section</em>'}</span>
-        <span class="section-done-badge">${done}/${total}</span>
-        <span class="section-price-tag" id="sec-price-${sec.id}">${secPrice}</span>
-      </div>
-      <div class="artist-card-list" id="seclist-${sec.id}"></div>`;
+    secEl.querySelector('.artist-section-name').innerHTML =
+      escArtist(sec.label) || '<em style="opacity:.5">Untitled Section</em>';
+    secEl.querySelector('.section-done-badge').textContent = `${done}/${total}`;
+
+    const priceTag = secEl.querySelector('.section-price-tag');
+    priceTag.id          = `sec-price-${sec.id}`;
+    priceTag.textContent = secPrice;
+
+    const cardList = secEl.querySelector('.artist-card-list');
+    cardList.id = `seclist-${sec.id}`;
 
     container.appendChild(secEl);
-
-    sec.stickers.forEach(s => {
-      const card = buildStickerCard(comm.id, sec.id, s);
-      document.getElementById(`seclist-${sec.id}`).appendChild(card);
-    });
+    sec.stickers.forEach(s => cardList.appendChild(buildStickerCard(comm.id, sec.id, s)));
   });
 }
 
 
 function buildStickerCard(commId, sid, sticker) {
-  const card = document.createElement('div');
-  card.className = `artist-card${sticker.done ? ' is-done' : ''}`;
+  const card = document.getElementById('tmpl-artist-card').content.cloneNode(true).firstElementChild;
+  if (sticker.done) card.classList.add('is-done');
   card.dataset.cid = sticker.id;
 
-  const tagHTML = buildTagPills(sticker);
+  const doneCheck = card.querySelector('.done-checkbox');
+  doneCheck.checked = sticker.done;
+  doneCheck.addEventListener('change', () => toggleDone(commId, sid, sticker.id));
+
+  const titleEl = card.querySelector('.artist-card-num');
+  titleEl.innerHTML = escArtist(sticker.title) || '<em style="opacity:.5">Untitled</em>';
+
+  const tagsEl = card.querySelector('.tag-pills-header');
+  tagsEl.id        = `tags-${sticker.id}`;
+  tagsEl.innerHTML = buildTagPills(sticker);
+
+  const fieldData = [
+    ['emotion', sticker.emotion],
+    ['pose',    sticker.pose],
+    ['notes',   sticker.notes],
+  ];
+  fieldData.forEach(([key, val]) => {
+    const row = card.querySelector(`[data-field="${key}"]`);
+    if (!val) { row.remove(); return; }
+    row.querySelector('.field-row-val').textContent = val;
+  });
 
   const imgsHTML = (sticker.images || []).map(img =>
-    `<img src="${img.dataUrl}" class="ref-thumb" alt="${escArtist(img.name)}"
-      onclick="openArtistLightbox('${encodeURIComponent(img.dataUrl)}')">`
+    `<img src="${img.dataUrl}" class="ref-thumb" alt="${escArtist(img.name)}">`
   ).join('');
+  if (imgsHTML) {
+    const refsDiv     = document.createElement('div');
+    refsDiv.className = 'artist-card-refs';
+    refsDiv.innerHTML = imgsHTML;
+    refsDiv.querySelectorAll('img').forEach(img => {
+      img.addEventListener('click', () => openArtistLightbox(encodeURIComponent(img.src)));
+    });
+    card.querySelector('.artist-card-body').appendChild(refsDiv);
+  }
 
-  const fieldRow = (label, val) => val
-    ? `<div class="card-field-row"><span class="field-row-label">${label}</span><span class="field-row-val">${escArtist(val)}</span></div>`
-    : '';
+  const flagItems  = card.querySelectorAll('.flag-item');
+  const countWraps = card.querySelectorAll('.char-count-wrap');
+  const flagSetup  = [
+    { field: 'nsfw',      countField: 'nsfwCharCount', val: sticker.nsfw,      count: sticker.nsfwCharCount || 1 },
+    { field: 'ych',       countField: 'ychCount',      val: sticker.ych,       count: sticker.ychCount      || 1 },
+    { field: 'multiChar', countField: 'charCount',     val: sticker.multiChar, count: sticker.charCount     || 1 },
+  ];
+  flagSetup.forEach(({ field, countField, val, count }, i) => {
+    const label    = flagItems[i];
+    const wrap     = countWraps[i];
+    const checkbox = label.querySelector('input[type="checkbox"]');
+    const numInput = wrap.querySelector('input[type="number"]');
+    checkbox.checked = !!val;
+    numInput.value   = count;
+    if (val) { label.classList.add('active'); wrap.classList.add('visible'); }
+    checkbox.addEventListener('change', () => setFlag(commId, sid, sticker.id, field, checkbox.checked));
+    numInput.addEventListener('input',  () => setFlag(commId, sid, sticker.id, countField, +numInput.value));
+  });
 
-  card.innerHTML = `
-    <div class="artist-card-header">
-      <label class="done-toggle" title="Mark as done">
-        <input type="checkbox" class="done-checkbox" ${sticker.done ? 'checked' : ''}
-          onchange="toggleDone('${commId}',${sid},${sticker.id})">
-        <span class="done-check-ui"></span>
-      </label>
-      <span class="artist-card-num">
-        ${escArtist(sticker.title) || `<em style="opacity:.5">Untitled</em>`}
-      </span>
-      <div class="tag-pills-header" id="tags-${sticker.id}">${tagHTML}</div>
-    </div>
-
-    <div class="artist-card-body">
-      <div class="artist-card-info">
-        ${fieldRow('Expression', sticker.emotion)}
-        ${fieldRow('Pose', sticker.pose)}
-        ${fieldRow('Notes', sticker.notes)}
-      </div>
-      ${imgsHTML.length ? `<div class="artist-card-refs">${imgsHTML}</div>` : ''}
-    </div>
-
-    <div class="sticker-flags artist-flags">
-      <label class="flag-item flag-nsfw${sticker.nsfw ? ' active' : ''}">
-        <span class="sw"><input type="checkbox" ${sticker.nsfw ? 'checked' : ''}
-          onchange="setFlag('${commId}',${sid},${sticker.id},'nsfw',this.checked)">
-          <span class="sw-track"></span></span>
-        NSFW
-      </label>
-      <div class="char-count-wrap${sticker.nsfw ? ' visible' : ''}" data-wrap="nsfw">
-        <label>NSFW Chars:</label>
-        <input class="char-count-input" type="number" min="1" max="99" value="${sticker.nsfwCharCount || 1}"
-          oninput="setFlag('${commId}',${sid},${sticker.id},'nsfwCharCount',+this.value)">
-      </div>
-      <label class="flag-item flag-ych${sticker.ych ? ' active' : ''}">
-        <span class="sw"><input type="checkbox" ${sticker.ych ? 'checked' : ''}
-          onchange="setFlag('${commId}',${sid},${sticker.id},'ych',this.checked)">
-          <span class="sw-track"></span></span>
-        YCH
-      </label>
-      <div class="char-count-wrap${sticker.ych ? ' visible' : ''}" data-wrap="ych">
-        <label>Slots:</label>
-        <input class="char-count-input" type="number" min="1" max="99" value="${sticker.ychCount || 1}"
-          oninput="setFlag('${commId}',${sid},${sticker.id},'ychCount',+this.value)">
-      </div>
-      <label class="flag-item flag-multi${sticker.multiChar ? ' active' : ''}">
-        <span class="sw"><input type="checkbox" ${sticker.multiChar ? 'checked' : ''}
-          onchange="setFlag('${commId}',${sid},${sticker.id},'multiChar',this.checked)">
-          <span class="sw-track"></span></span>
-        Additional Characters
-      </label>
-      <div class="char-count-wrap${sticker.multiChar ? ' visible' : ''}" data-wrap="multi">
-        <label>Add. Chars:</label>
-        <input class="char-count-input" type="number" min="1" max="99" value="${sticker.charCount || 1}"
-          oninput="setFlag('${commId}',${sid},${sticker.id},'charCount',+this.value)">
-      </div>
-    </div>
-
-    <div class="artist-notes-row">
-      <label class="area-label">Artist Notes</label>
-      <textarea class="artist-notes-input" placeholder="Your private notes for this sticker…"
-        oninput="setArtistNotes('${commId}',${sid},${sticker.id},this.value)">${escArtist(sticker.artistNotes || '')}</textarea>
-    </div>`;
+  const notesTA = card.querySelector('.artist-notes-input');
+  notesTA.value = sticker.artistNotes || '';
+  notesTA.addEventListener('input', () => setArtistNotes(commId, sid, sticker.id, notesTA.value));
 
   return card;
 }

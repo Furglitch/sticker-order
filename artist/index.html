@@ -20,7 +20,7 @@ permalink: /artist/
     <div class="sidebar-header">
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <span class="sidebar-title">🎨 Commissions</span>
-        <div class="theme-toggle" onclick="artistToggleTheme()" title="Toggle light/dark" role="button" aria-label="Toggle theme">
+        <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark" role="button" aria-label="Toggle theme">
           <div class="toggle-thumb"></div>
           <div class="toggle-icons"><span>☀️</span><span>🌙</span></div>
         </div>
@@ -33,6 +33,10 @@ permalink: /artist/
       </button>
     </div>
     <div id="commission-list"></div>
+    <div class="sidebar-empty" id="sidebar-empty" hidden>
+      <span>📭</span>
+      <p>No commissions yet.<br>Import an order sheet to get started.</p>
+    </div>
     <div class="sidebar-copyright">
       Copyright &copy; 2026 Furglitch &mdash; <a href="https://github.com/Furglitch/sticker-order/blob/main/LICENSE" target="_blank" rel="noopener">GPL v3</a>
     </div>
@@ -77,17 +81,87 @@ permalink: /artist/
 <div id="artist-toast"></div>
 <input type="file" id="import-input" accept=".json" multiple style="display:none">
 
+<template id="tmpl-meta-block">
+  <div class="meta-block panel">
+    <h2 class="block-heading">📋 Pack Details</h2>
+    <div class="meta-row" data-meta="username"><span class="meta-row-label">Username</span><span class="meta-row-val"></span></div>
+    <div class="meta-row" data-meta="character"><span class="meta-row-label">Character</span><span class="meta-row-val"></span></div>
+    <div class="meta-row" data-meta="desc"><span class="meta-row-label">Description</span><span class="meta-row-val"></span></div>
+    <div class="meta-row" data-meta="notes"><span class="meta-row-label">Notes for Artist</span><span class="meta-row-val"></span></div>
+    <div class="meta-row meta-row-images" data-meta="charImages">
+      <span class="meta-row-label">Character Refs</span>
+      <div class="thumb-strip"></div>
+    </div>
+    <div class="meta-row" data-meta="importedAt"><span class="meta-row-label">Imported</span><span class="meta-row-val"></span></div>
+  </div>
+</template>
+
+<template id="tmpl-artist-section">
+  <div class="artist-section">
+    <div class="artist-section-head">
+      <span class="section-letter"></span>
+      <span class="artist-section-name"></span>
+      <span class="section-done-badge"></span>
+      <span class="section-price-tag"></span>
+    </div>
+    <div class="artist-card-list"></div>
+  </div>
+</template>
+
+<template id="tmpl-artist-card">
+  <div class="artist-card">
+    <div class="artist-card-header">
+      <label class="done-toggle" title="Mark as done">
+        <input type="checkbox" class="done-checkbox">
+        <span class="done-check-ui"></span>
+      </label>
+      <span class="artist-card-num"></span>
+      <div class="tag-pills-header"></div>
+    </div>
+    <div class="artist-card-body">
+      <div class="artist-card-info">
+        <div class="card-field-row" data-field="emotion"><span class="field-row-label">Expression</span><span class="field-row-val"></span></div>
+        <div class="card-field-row" data-field="pose"><span class="field-row-label">Pose</span><span class="field-row-val"></span></div>
+        <div class="card-field-row" data-field="notes"><span class="field-row-label">Notes</span><span class="field-row-val"></span></div>
+      </div>
+    </div>
+    <div class="sticker-flags artist-flags">
+      <label class="flag-item flag-nsfw">
+        <span class="sw"><input type="checkbox"><span class="sw-track"></span></span>
+        NSFW
+      </label>
+      <div class="char-count-wrap" data-wrap="nsfw">
+        <label>NSFW Characters:</label>
+        <input class="char-count-input" type="number" min="1" max="99" value="1">
+      </div>
+      <label class="flag-item flag-ych">
+        <span class="sw"><input type="checkbox"><span class="sw-track"></span></span>
+        YCH
+      </label>
+      <div class="char-count-wrap" data-wrap="ych">
+        <label>Slots:</label>
+        <input class="char-count-input" type="number" min="1" max="99" value="1">
+      </div>
+      <label class="flag-item flag-multi">
+        <span class="sw"><input type="checkbox"><span class="sw-track"></span></span>
+        Additional Characters
+      </label>
+      <div class="char-count-wrap" data-wrap="multi">
+        <label>Additional Characters:</label>
+        <input class="char-count-input" type="number" min="1" max="99" value="1">
+      </div>
+    </div>
+    <div class="artist-notes-row">
+      <label class="area-label">Artist Notes</label>
+      <textarea class="artist-notes-input" placeholder="Your private notes for this sticker…"></textarea>
+    </div>
+  </div>
+</template>
+
+<script src="{{ '/assets/js/theme.js'         | relative_url }}"></script>
 <script src="{{ '/assets/js/artist/state.js'  | relative_url }}"></script>
 <script src="{{ '/assets/js/artist/data.js'   | relative_url }}"></script>
 <script src="{{ '/assets/js/artist/ui.js'     | relative_url }}"></script>
-<script>
-  function artistToggleTheme() {
-    const cur = document.documentElement.getAttribute('data-theme');
-    const next = cur === 'latte' ? 'mocha' : 'latte';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('stickerOrderSheetTheme', next);
-  }
-</script>
 <script src="{{ '/assets/js/artist/init.js'   | relative_url }}"></script>
 
 </body>
