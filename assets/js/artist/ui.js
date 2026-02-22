@@ -49,6 +49,7 @@ function renderStats() {
   const done     = stickers.filter(s => s.done).length;
 
   // Flag counts
+  const standard = stickers.filter(s => !s.nsfw && !s.ych && !s.multiChar).length;
   const nsfw  = stickers.filter(s => s.nsfw && !s.ych && !s.multiChar).length;
   const ych   = stickers.filter(s => s.ych && !s.nsfw && !s.multiChar).length;
   const multi = stickers.filter(s => s.multiChar && !s.nsfw && !s.ych);
@@ -100,6 +101,7 @@ function renderStats() {
       <span class="stats-pct">${pct}%</span>
     </div>
     <div class="stat-pills">
+      ${pill('Standard', standard, 'overlay2')}
       ${pill('NSFW', nsfw, 'red')}
       ${pill('YCH', ych, 'blue')}
       ${multiPills}
@@ -107,7 +109,7 @@ function renderStats() {
       ${pill('NSFW+Multi', nsfwMulti, 'mauve')}
       ${pill('YCH+Multi', ychMulti, 'teal')}
       ${allThreePills}
-      ${!nsfw && !ych && !multi.length && !nsfwYch && !nsfwMulti && !ychMulti && !allThreeTotal ? '<span style="color:var(--overlay0);font-size:0.82rem;font-style:italic;">No flags set.</span>' : ''}
+      ${!standard && !nsfw && !ych && !multi.length && !nsfwYch && !nsfwMulti && !ychMulti && !allThreeTotal ? '<span style="color:var(--overlay0);font-size:0.82rem;font-style:italic;">No flags set.</span>' : ''}
     </div>`;
 }
 
