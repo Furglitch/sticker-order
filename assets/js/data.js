@@ -4,7 +4,6 @@ function collectMeta() {
     username:  document.getElementById('meta-username').value,
     character: document.getElementById('meta-character').value,
     desc:      document.getElementById('meta-desc').value,
-    style:     document.getElementById('meta-style').value,
     notes:     document.getElementById('meta-notes').value,
     charImages,
   };
@@ -50,7 +49,6 @@ function loadJSON(event) {
         document.getElementById('meta-username').value  = data.meta.username  || '';
         document.getElementById('meta-character').value = data.meta.character || '';
         document.getElementById('meta-desc').value      = data.meta.desc      || '';
-        document.getElementById('meta-style').value     = data.meta.style     || '';
         document.getElementById('meta-notes').value     = data.meta.notes     || '';
         charImages = [];
         document.getElementById('char-thumbs').innerHTML = '';
@@ -77,7 +75,7 @@ function clearAll() {
   if ((sections.length || total) && !confirm('Reset the entire form? This cannot be undone.')) return;
   sections   = [];
   charImages = [];
-  ['meta-packname', 'meta-username', 'meta-character', 'meta-desc', 'meta-style', 'meta-notes'].forEach(id => {
+  ['meta-packname', 'meta-username', 'meta-character', 'meta-desc', 'meta-notes'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
