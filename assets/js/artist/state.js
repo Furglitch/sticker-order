@@ -1,6 +1,6 @@
 const STORAGE_KEY = 'stickerArtistData';
 
-let artistData = { activeId: null, commissions: {}, rates: { base: 0, nsfw: 0, multiChar: 0, ych: 0 } };
+let artistData = { activeId: null, commissions: {}, rates: { base: 0, nsfw: 0, nsfwMode: 'flat', multiChar: 0, ych: 0 } };
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(artistData));
@@ -11,10 +11,11 @@ function loadState() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       artistData = JSON.parse(raw);
-      if (!artistData.rates) artistData.rates = { base: 0, nsfw: 0, multiChar: 0, ych: 0 };
+      if (!artistData.rates) artistData.rates = { base: 0, nsfw: 0, nsfwMode: 'flat', multiChar: 0, ych: 0 };
+      if (!artistData.rates.nsfwMode) artistData.rates.nsfwMode = 'flat';
     }
   } catch {
-    artistData = { activeId: null, commissions: {}, rates: { base: 0, nsfw: 0, multiChar: 0, ych: 0 } };
+    artistData = { activeId: null, commissions: {}, rates: { base: 0, nsfw: 0, nsfwMode: 'flat', multiChar: 0, ych: 0 } };
   }
 }
 

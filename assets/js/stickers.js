@@ -9,10 +9,12 @@ function addSticker(sid, data = {}) {
     pose:      data.pose      || '',
     notes:     data.notes     || '',
     images:    data.images    || [],
-    nsfw:      data.nsfw      || false,
-    ych:       data.ych       || false,
-    multiChar: data.multiChar || false,
-    charCount: data.charCount || 2,
+    nsfw:          data.nsfw          || false,
+    nsfwCharCount: data.nsfwCharCount || 1,
+    ych:           data.ych           || false,
+    ychCount:      data.ychCount      || 1,
+    multiChar:     data.multiChar     || false,
+    charCount:     data.charCount     || 1,
   };
   sec.stickers.push(sticker);
   renderStickerCard(sid, sticker);
@@ -97,17 +99,27 @@ function renderStickerCard(sid, sticker) {
         <span class="sw"><input type="checkbox" ${sticker.nsfw ? 'checked' : ''} onchange="updateStickerFlag(${sid},${sticker.id},'nsfw',this.checked)"><span class="sw-track"></span></span>
         NSFW
       </label>
+      <div class="char-count-wrap${sticker.nsfw ? ' visible' : ''}" id="nsfwcount-${sticker.id}">
+        <label for="nsfwinput-${sticker.id}">NSFW Chars:</label>
+        <input class="char-count-input" id="nsfwinput-${sticker.id}" type="number" min="1" max="99" value="${sticker.nsfwCharCount || 1}"
+          oninput="updateStickerField(${sid},${sticker.id},'nsfwCharCount',+this.value)">
+      </div>
       <label class="flag-item flag-ych${sticker.ych ? ' active' : ''}">
         <span class="sw"><input type="checkbox" ${sticker.ych ? 'checked' : ''} onchange="updateStickerFlag(${sid},${sticker.id},'ych',this.checked)"><span class="sw-track"></span></span>
         YCH
       </label>
+      <div class="char-count-wrap${sticker.ych ? ' visible' : ''}" id="ychcount-${sticker.id}">
+        <label for="ychinput-${sticker.id}">Slots:</label>
+        <input class="char-count-input" id="ychinput-${sticker.id}" type="number" min="1" max="99" value="${sticker.ychCount || 1}"
+          oninput="updateStickerField(${sid},${sticker.id},'ychCount',+this.value)">
+      </div>
       <label class="flag-item flag-multi${sticker.multiChar ? ' active' : ''}">
         <span class="sw"><input type="checkbox" ${sticker.multiChar ? 'checked' : ''} onchange="updateStickerFlag(${sid},${sticker.id},'multiChar',this.checked)"><span class="sw-track"></span></span>
-        Multi-Character
+        Additional Characters
       </label>
       <div class="char-count-wrap${sticker.multiChar ? ' visible' : ''}" id="charcount-${sticker.id}">
-        <label for="charinput-${sticker.id}">Characters:</label>
-        <input class="char-count-input" id="charinput-${sticker.id}" type="number" min="2" max="99" value="${sticker.charCount}"
+        <label for="charinput-${sticker.id}">Add. Chars:</label>
+        <input class="char-count-input" id="charinput-${sticker.id}" type="number" min="1" max="99" value="${sticker.charCount}"
           oninput="updateStickerField(${sid},${sticker.id},'charCount',+this.value)">
       </div>
     </div>
@@ -142,32 +154,37 @@ function updateStickerFlag(sid, cid, flag, val) {
   const s = sec.stickers.find(x => x.id === cid);
   if (!s) return;
   s[flag] = val;
-  
-  if (flag === 'ych' && val && !s.multiChar) {
-    s.multiChar = true;
-    const card = document.querySelector(`.sticker-card[data-cid="${cid}"]`);
-    if (card) {
-      const multiLabel = card.querySelector('.flag-multi');
-      const multiCheckbox = card.querySelector('.flag-multi input[type="checkbox"]');
-      const wrap = document.getElementById(`charcount-${cid}`);
-      if (multiLabel) multiLabel.classList.add('active');
-      if (multiCheckbox) multiCheckbox.checked = true;
-      if (wrap) wrap.classList.add('visible');
-    }
-  }
-  
+
   const card = document.querySelector(`.sticker-card[data-cid="${cid}"]`);
   if (!card) return;
   const labelMap = { nsfw: 'flag-nsfw', ych: 'flag-ych', multiChar: 'flag-multi' };
   const label = card.querySelector('.' + labelMap[flag]);
   if (label) label.classList.toggle('active', val);
+  if (flag === 'nsfw') {
+    const wrap = document.getElementById(`nsfwcount-${cid}`);
+    if (wrap) wrap.classList.toggle('visible', val);
+    if (!val) {
+      s.nsfwCharCount = 1;
+      const input = wrap?.querySelector('input[type="number"]');
+      if (input) input.value = '1';
+    }
+  }
+  if (flag === 'ych') {
+    const wrap = document.getElementById(`ychcount-${cid}`);
+    if (wrap) wrap.classList.toggle('visible', val);
+    if (!val) {
+      s.ychCount = 1;
+      const input = wrap?.querySelector('input[type="number"]');
+      if (input) input.value = '1';
+    }
+  }
   if (flag === 'multiChar') {
     const wrap = document.getElementById(`charcount-${cid}`);
     if (wrap) wrap.classList.toggle('visible', val);
     if (!val) {
-      s.charCount = 2;
+      s.charCount = 1;
       const input = wrap?.querySelector('input[type="number"]');
-      if (input) input.value = '2';
+      if (input) input.value = '1';
     }
   }
 }

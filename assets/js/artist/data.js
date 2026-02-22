@@ -85,39 +85,15 @@ function toggleDone(commId, sid, cid) {
 
 function setFlag(commId, sid, cid, flag, val) {
   updateSticker(commId, sid, cid, { [flag]: val });
-  
-  if (flag === 'ych' && val) {
-    const comm = artistData.commissions[commId];
-    if (comm) {
-      const sec = comm.sections.find(s => s.id === sid);
-      if (sec) {
-        const sticker = sec.stickers.find(s => s.id === cid);
-        if (sticker && !sticker.multiChar) {
-          sticker.multiChar = true;
-          saveState();
-          const card = document.querySelector(`.artist-card[data-cid="${cid}"]`);
-          if (card) {
-            const multiLabel = card.querySelector('.flag-multi');
-            const multiCheckbox = card.querySelector('.flag-multi input[type="checkbox"]');
-            const wrap = card.querySelector('.char-count-wrap');
-            if (multiLabel) multiLabel.classList.add('active');
-            if (multiCheckbox) multiCheckbox.checked = true;
-            if (wrap) wrap.classList.add('visible');
-            renderTagPills(card, commId, sid, cid);
-          }
-        }
-      }
-    }
-  }
-  
+
   renderStats();
   const card = document.querySelector(`.artist-card[data-cid="${cid}"]`);
   if (!card) return;
   const flagMap = { nsfw: 'flag-nsfw', ych: 'flag-ych', multiChar: 'flag-multi' };
   const lbl = flagMap[flag] ? card.querySelector('.' + flagMap[flag]) : null;
   if (lbl) lbl.classList.toggle('active', val);
-  if (flag === 'multiChar') {
-    const wrap = card.querySelector('.char-count-wrap');
+  if (flag === 'nsfw') {
+    const wrap = card.querySelector('[data-wrap="nsfw"]');
     if (wrap) wrap.classList.toggle('visible', val);
     if (!val) {
       const comm = artistData.commissions[commId];
@@ -126,9 +102,47 @@ function setFlag(commId, sid, cid, flag, val) {
         if (sec) {
           const sticker = sec.stickers.find(s => s.id === cid);
           if (sticker) {
-            sticker.charCount = 2;
-            const input = wrap.querySelector('input[type="number"]');
-            if (input) input.value = '2';
+            sticker.nsfwCharCount = 1;
+            const input = wrap?.querySelector('input[type="number"]');
+            if (input) input.value = '1';
+            saveState();
+          }
+        }
+      }
+    }
+  }
+  if (flag === 'ych') {
+    const wrap = card.querySelector('[data-wrap="ych"]');
+    if (wrap) wrap.classList.toggle('visible', val);
+    if (!val) {
+      const comm = artistData.commissions[commId];
+      if (comm) {
+        const sec = comm.sections.find(s => s.id === sid);
+        if (sec) {
+          const sticker = sec.stickers.find(s => s.id === cid);
+          if (sticker) {
+            sticker.ychCount = 1;
+            const input = wrap?.querySelector('input[type="number"]');
+            if (input) input.value = '1';
+            saveState();
+          }
+        }
+      }
+    }
+  }
+  if (flag === 'multiChar') {
+    const wrap = card.querySelector('[data-wrap="multi"]');
+    if (wrap) wrap.classList.toggle('visible', val);
+    if (!val) {
+      const comm = artistData.commissions[commId];
+      if (comm) {
+        const sec = comm.sections.find(s => s.id === sid);
+        if (sec) {
+          const sticker = sec.stickers.find(s => s.id === cid);
+          if (sticker) {
+            sticker.charCount = 1;
+            const input = wrap?.querySelector('input[type="number"]');
+            if (input) input.value = '1';
             saveState();
           }
         }
@@ -146,5 +160,13 @@ function setRate(key, val) {
   if (!artistData.rates) artistData.rates = {};
   artistData.rates[key] = parseFloat(val) || 0;
   saveState();
+  renderStats();
+}
+
+function setNsfwMode(mode) {
+  if (!artistData.rates) artistData.rates = {};
+  artistData.rates.nsfwMode = mode;
+  saveState();
+  renderRatesPanel();
   renderStats();
 }

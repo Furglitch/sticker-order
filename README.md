@@ -68,7 +68,7 @@ When a commission is selected, the main panel shows:
 - Overall progress bar and percentage
 - Pill badges for each sticker type:
   - Standard, NSFW, YCH, Multi-Character (broken down by character count)
-  - Combinations: NSFW+YCH, NSFW+Multi, YCH+Multi, all three
+  - Combinations: NSFW+YCH, NSFW+Add, YCH+Add, all three
 - **Estimated total price** (shown when rates are configured)
 
 **Sticker cards** — one per sticker, showing all customer-provided details plus:

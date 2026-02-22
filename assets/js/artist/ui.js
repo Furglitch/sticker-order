@@ -49,42 +49,53 @@ function renderStats() {
   const total    = stickers.length;
   const done     = stickers.filter(s => s.done).length;
 
-  // Flag counts
+  // Flag counts — each flag is independent; a sticker can appear in multiple buckets
   const standard = stickers.filter(s => !s.nsfw && !s.ych && !s.multiChar).length;
-  const nsfw  = stickers.filter(s => s.nsfw && !s.ych && !s.multiChar).length;
-  const ych   = stickers.filter(s => s.ych && !s.nsfw && !s.multiChar).length;
-  const multi = stickers.filter(s => s.multiChar && !s.nsfw && !s.ych);
 
-  // Multi-char breakdown by charCount
-  const multiCounts = {};
-  multi.forEach(s => {
-    const n = s.charCount || 2;
-    multiCounts[n] = (multiCounts[n] || 0) + 1;
+  // ALL NSFW stickers, grouped by nsfwCharCount (includes combos)
+  const nsfwOnlyCounts = {};
+  stickers.filter(s => s.nsfw).forEach(s => {
+    const n = s.nsfwCharCount || 1;
+    nsfwOnlyCounts[n] = (nsfwOnlyCounts[n] || 0) + 1;
   });
 
-  // Combos
+  // ALL YCH stickers, grouped by ychCount (includes combos)
+  const ychOnlyCounts = {};
+  stickers.filter(s => s.ych).forEach(s => {
+    const n = s.ychCount || 1;
+    ychOnlyCounts[n] = (ychOnlyCounts[n] || 0) + 1;
+  });
+
+  // ALL multiChar stickers, grouped by charCount (includes combos)
+  const multiOnlyCounts = {};
+  stickers.filter(s => s.multiChar).forEach(s => {
+    const n = s.charCount || 1;
+    multiOnlyCounts[n] = (multiOnlyCounts[n] || 0) + 1;
+  });
+
+  // NSFW+YCH (no multiChar)
   const nsfwYch = stickers.filter(s => s.nsfw && s.ych && !s.multiChar).length;
 
-  // NSFW+Multi — broken down by charCount
+  // NSFW+Add (no YCH), grouped by charCount
   const nsfwMultiCounts = {};
   stickers.filter(s => s.nsfw && s.multiChar && !s.ych).forEach(s => {
-    const n = s.charCount || 2;
+    const n = s.charCount || 1;
     nsfwMultiCounts[n] = (nsfwMultiCounts[n] || 0) + 1;
   });
   const nsfwMultiTotal = Object.values(nsfwMultiCounts).reduce((a, b) => a + b, 0);
 
-  // YCH+Multi — broken down by charCount
+  // YCH+Add (no NSFW), grouped by charCount
   const ychMultiCounts = {};
   stickers.filter(s => s.ych && s.multiChar && !s.nsfw).forEach(s => {
-    const n = s.charCount || 2;
+    const n = s.charCount || 1;
     ychMultiCounts[n] = (ychMultiCounts[n] || 0) + 1;
   });
   const ychMultiTotal = Object.values(ychMultiCounts).reduce((a, b) => a + b, 0);
 
-  // All three — broken down by charCount
+  // All three flags, grouped by charCount
   const allThreeCounts = {};
   stickers.filter(s => s.nsfw && s.ych && s.multiChar).forEach(s => {
-    const n = s.charCount || 2;
+    const n = s.charCount || 1;
     allThreeCounts[n] = (allThreeCounts[n] || 0) + 1;
   });
   const allThreeTotal = Object.values(allThreeCounts).reduce((a, b) => a + b, 0);
@@ -97,39 +108,47 @@ function renderStats() {
       <span class="stat-count">${count}</span>
     </div>` : '';
 
-  const multiPills = Object.entries(multiCounts)
+  const nsfwPills = Object.entries(nsfwOnlyCounts)
     .sort(([a],[b]) => a - b)
-    .map(([n, count]) => pill(`${n}-char`, count, 'green'))
+    .map(([n, count]) => pill(`NSFW ${n}×`, count, 'red'))
     .join('');
 
-  const allThreePills = Object.entries(allThreeCounts)
+  const ychPills = Object.entries(ychOnlyCounts)
     .sort(([a],[b]) => a - b)
-    .map(([n, count]) => pill(`All three ${n}×`, count, 'flamingo'))
+    .map(([n, count]) => pill(`YCH ${n}×`, count, 'blue'))
+    .join('');
+
+  const multiPills = Object.entries(multiOnlyCounts)
+    .sort(([a],[b]) => a - b)
+    .map(([n, count]) => pill(`Add ${n}×`, count, 'green'))
     .join('');
 
   const nsfwMultiPills = Object.entries(nsfwMultiCounts)
     .sort(([a],[b]) => a - b)
-    .map(([n, count]) => pill(`NSFW+Multi ${n}×`, count, 'mauve'))
+    .map(([n, count]) => pill(`NSFW+Add ${n}×`, count, 'mauve'))
     .join('');
 
   const ychMultiPills = Object.entries(ychMultiCounts)
     .sort(([a],[b]) => a - b)
-    .map(([n, count]) => pill(`YCH+Multi ${n}×`, count, 'teal'))
+    .map(([n, count]) => pill(`YCH+Add ${n}×`, count, 'teal'))
     .join('');
 
+  const allThreePills = Object.entries(allThreeCounts)
+    .sort(([a],[b]) => a - b)
+    .map(([n, count]) => pill(`All 3 ${n}×`, count, 'flamingo'))
+    .join('');
+
+  const nsfwOnlyTotal = Object.values(nsfwOnlyCounts).reduce((a, b) => a + b, 0);
+  const ychOnlyTotal  = Object.values(ychOnlyCounts).reduce((a, b) => a + b, 0);
+  const multiOnlyTotal = Object.values(multiOnlyCounts).reduce((a, b) => a + b, 0);
+  const isEmpty = !standard && !nsfwOnlyTotal && !ychOnlyTotal && !multiOnlyTotal
+                  && !nsfwYch && !nsfwMultiTotal && !ychMultiTotal && !allThreeTotal;
+
   // Pricing total
-  const r = artistData.rates || {};
-  const hasRates = (parseFloat(r.base) || 0) + (parseFloat(r.nsfw) || 0) +
-                   (parseFloat(r.multiChar) || 0) + (parseFloat(r.ych) || 0) > 0;
+  const hasRates = hasAnyRates();
   let totalHTML = '';
   if (hasRates) {
-    const orderTotal = stickers.reduce((sum, s) => {
-      let price = parseFloat(r.base) || 0;
-      if (s.nsfw)      price += parseFloat(r.nsfw)     || 0;
-      if (s.ych)       price += parseFloat(r.ych)      || 0;
-      if (s.multiChar) price += (Math.max(s.charCount || 2, 2) - 1) * (parseFloat(r.multiChar) || 0);
-      return sum + price;
-    }, 0);
+    const orderTotal = stickers.reduce((sum, s) => sum + calcStickerPrice(s), 0);
     totalHTML = `<div class="stats-total">
       <span>Est. Total</span>
       <span class="stats-total-amount">$${orderTotal.toFixed(2)}</span>
@@ -146,16 +165,23 @@ function renderStats() {
     </div>
     <div class="stat-pills">
       ${pill('Standard', standard, 'overlay2')}
-      ${pill('NSFW', nsfw, 'red')}
-      ${pill('YCH', ych, 'blue')}
+      ${nsfwPills}
+      ${ychPills}
       ${multiPills}
       ${pill('NSFW+YCH', nsfwYch, 'maroon')}
       ${nsfwMultiPills}
       ${ychMultiPills}
       ${allThreePills}
-      ${!standard && !nsfw && !ych && !multi.length && !nsfwYch && !nsfwMultiTotal && !ychMultiTotal && !allThreeTotal ? '<span style="color:var(--overlay0);font-size:0.82rem;font-style:italic;">No flags set.</span>' : ''}
+      ${isEmpty ? '<span style="color:var(--overlay0);font-size:0.82rem;font-style:italic;">No flags set.</span>' : ''}
     </div>
     ${totalHTML}`;
+
+  // Update per-section price tags
+  comm.sections.forEach(sec => {
+    const el = document.getElementById(`sec-price-${sec.id}`);
+    if (!el) return;
+    el.textContent = hasRates ? `$${calcSectionTotal(sec).toFixed(2)}` : '';
+  });
 }
 
 
@@ -231,11 +257,14 @@ function renderSections(comm) {
     secEl.style.setProperty('--accent', `var(${accentVar})`);
     secEl.style.borderLeftColor = `var(${accentVar})`;
 
+    const secPrice = hasAnyRates() ? `$${calcSectionTotal(sec).toFixed(2)}` : '';
+
     secEl.innerHTML = `
       <div class="artist-section-head">
         <span class="section-letter" style="color:var(${accentVar})">${letter}</span>
         <span class="artist-section-name">${escArtist(sec.label) || '<em style="opacity:.5">Untitled Section</em>'}</span>
         <span class="section-done-badge">${done}/${total}</span>
+        <span class="section-price-tag" id="sec-price-${sec.id}">${secPrice}</span>
       </div>
       <div class="artist-card-list" id="seclist-${sec.id}"></div>`;
 
@@ -294,21 +323,31 @@ function buildStickerCard(commId, sid, sticker) {
           <span class="sw-track"></span></span>
         NSFW
       </label>
+      <div class="char-count-wrap${sticker.nsfw ? ' visible' : ''}" data-wrap="nsfw">
+        <label>NSFW Chars:</label>
+        <input class="char-count-input" type="number" min="1" max="99" value="${sticker.nsfwCharCount || 1}"
+          oninput="setFlag('${commId}',${sid},${sticker.id},'nsfwCharCount',+this.value)">
+      </div>
       <label class="flag-item flag-ych${sticker.ych ? ' active' : ''}">
         <span class="sw"><input type="checkbox" ${sticker.ych ? 'checked' : ''}
           onchange="setFlag('${commId}',${sid},${sticker.id},'ych',this.checked)">
           <span class="sw-track"></span></span>
         YCH
       </label>
+      <div class="char-count-wrap${sticker.ych ? ' visible' : ''}" data-wrap="ych">
+        <label>Slots:</label>
+        <input class="char-count-input" type="number" min="1" max="99" value="${sticker.ychCount || 1}"
+          oninput="setFlag('${commId}',${sid},${sticker.id},'ychCount',+this.value)">
+      </div>
       <label class="flag-item flag-multi${sticker.multiChar ? ' active' : ''}">
         <span class="sw"><input type="checkbox" ${sticker.multiChar ? 'checked' : ''}
           onchange="setFlag('${commId}',${sid},${sticker.id},'multiChar',this.checked)">
           <span class="sw-track"></span></span>
-        Multi-Character
+        Additional Characters
       </label>
-      <div class="char-count-wrap${sticker.multiChar ? ' visible' : ''}">
-        <label>Characters:</label>
-        <input class="char-count-input" type="number" min="2" max="99" value="${sticker.charCount || 2}"
+      <div class="char-count-wrap${sticker.multiChar ? ' visible' : ''}" data-wrap="multi">
+        <label>Add. Chars:</label>
+        <input class="char-count-input" type="number" min="1" max="99" value="${sticker.charCount || 1}"
           oninput="setFlag('${commId}',${sid},${sticker.id},'charCount',+this.value)">
       </div>
     </div>
@@ -324,9 +363,18 @@ function buildStickerCard(commId, sid, sticker) {
 
 function buildTagPills(sticker) {
   const pills = [];
-  if (sticker.nsfw)      pills.push(`<span class="tag-pill tag-nsfw">NSFW</span>`);
-  if (sticker.ych)       pills.push(`<span class="tag-pill tag-ych">YCH</span>`);
-  if (sticker.multiChar) pills.push(`<span class="tag-pill tag-multi">${sticker.charCount || 2}×</span>`);
+  if (sticker.nsfw) {
+    const n = sticker.nsfwCharCount || 1;
+    pills.push(`<span class="tag-pill tag-nsfw">NSFW ${n}×</span>`);
+  }
+  if (sticker.ych) {
+    const n = sticker.ychCount || 1;
+    pills.push(`<span class="tag-pill tag-ych">YCH ${n}×</span>`);
+  }
+  if (sticker.multiChar) {
+    const n = sticker.charCount || 1;
+    pills.push(`<span class="tag-pill tag-multi">+${n}×</span>`);
+  }
   return pills.join('');
 }
 
@@ -361,6 +409,31 @@ function showArtistToast(msg) {
 }
 
 
+function calcStickerPrice(sticker) {
+  const r = artistData.rates || {};
+  let price = parseFloat(r.base) || 0;
+  if (sticker.nsfw) {
+    const nsfwChars = r.nsfwMode === 'per-char'
+      ? Math.max(sticker.nsfwCharCount || 1, 1)
+      : 1;
+    price += nsfwChars * (parseFloat(r.nsfw) || 0);
+  }
+  if (sticker.ych)       price += Math.max(sticker.ychCount || 1, 1) * (parseFloat(r.ych) || 0);
+  if (sticker.multiChar) price += Math.max(sticker.charCount || 1, 1) * (parseFloat(r.multiChar) || 0);
+  return price;
+}
+
+function calcSectionTotal(sec) {
+  return (sec.stickers || []).reduce((sum, s) => sum + calcStickerPrice(s), 0);
+}
+
+function hasAnyRates() {
+  const r = artistData.rates || {};
+  return (parseFloat(r.base) || 0) + (parseFloat(r.nsfw) || 0) +
+         (parseFloat(r.multiChar) || 0) + (parseFloat(r.ych) || 0) > 0;
+}
+
+
 function escArtist(str) {
   if (!str) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -379,14 +452,19 @@ function toggleSidebar() {
 
 
 function renderRatesPanel() {
-  const el = document.getElementById('rates-panel');
+  const el = document.getElementById('rates-modal-body');
   if (!el) return;
   const r = artistData.rates || {};
   const val = key => (r[key] > 0 ? r[key] : '');
 
-  const rateInput = (key, label) => `
+  const infoIcon = tip => `<span class="rate-info" aria-label="${tip}">
+    <span class="rate-info-icon">i</span>
+    <span class="rate-tooltip">${tip}</span>
+  </span>`;
+
+  const rateInput = (key, label, tip = '') => `
     <div class="rate-row">
-      <label class="rate-label">${label}</label>
+      <label class="rate-label">${label}${tip ? infoIcon(tip) : ''}</label>
       <div class="rate-input-wrap">
         <span class="rate-currency">$</span>
         <input class="rate-input" type="number" min="0" step="0.01" placeholder="0.00"
@@ -395,28 +473,44 @@ function renderRatesPanel() {
       </div>
     </div>`;
 
-  const collapsed = localStorage.getItem('ratesPanelCollapsed') === 'true';
+  const nsfwMode = (r.nsfwMode || 'flat');
+  const nsfwRow = `
+    <div class="rate-row">
+      <div class="rate-label-group">
+        <span class="rate-label">NSFW ${infoIcon(
+          nsfwMode === 'per-char'
+            ? 'Per Char: Charged for every NSFW character in the sticker.'
+            : 'Flat: Charged once per sticker, regardless of character count.'
+        )}</span>
+        <div class="nsfw-mode-toggle">
+          <button class="nsfw-mode-btn${nsfwMode === 'flat'     ? ' active' : ''}" onclick="setNsfwMode('flat')">Flat</button>
+          <button class="nsfw-mode-btn${nsfwMode === 'per-char' ? ' active' : ''}" onclick="setNsfwMode('per-char')">Per Char</button>
+        </div>
+      </div>
+      <div class="rate-input-wrap">
+        <span class="rate-currency">$</span>
+        <input class="rate-input" type="number" min="0" step="0.01" placeholder="0.00"
+          value="${val('nsfw')}"
+          oninput="setRate('nsfw', this.value)">
+      </div>
+    </div>`;
 
   el.innerHTML = `
-    <div class="rates-section">
-      <button class="rates-toggle" onclick="toggleRatesPanel()" title="Toggle pricing">
-        💰 Pricing
-        <span class="rates-chevron${collapsed ? ' rotated' : ''}">▾</span>
-      </button>
-      <div class="rates-inputs${collapsed ? ' collapsed' : ''}">
-        ${rateInput('base',     'Standard / sticker')}
-        ${rateInput('nsfw',     'NSFW upcharge')}
-        ${rateInput('multiChar','Additional character')}
-        ${rateInput('ych',      'YCH upcharge')}
-      </div>
+    ${rateInput('base', 'Base per-sticker', 'Charged once for every sticker in the order, before any upcharges.')}
+    <div class="rates-subsection">
+      <span class="rates-subsection-label">Upcharges</span>
+      ${rateInput('multiChar', 'Additional Character', 'Charged per extra character.')}
+      ${rateInput('ych',       'YCH',                  'Charged per YCH character. Does not stack with Additional Character upcharge.')}
+      ${nsfwRow}
     </div>`;
 }
 
-function toggleRatesPanel() {
-  const panel  = document.getElementById('rates-panel');
-  const inputs = panel.querySelector('.rates-inputs');
-  const chev   = panel.querySelector('.rates-chevron');
-  const isNowCollapsed = inputs.classList.toggle('collapsed');
-  chev.classList.toggle('rotated', isNowCollapsed);
-  localStorage.setItem('ratesPanelCollapsed', String(isNowCollapsed));
+function openRatesModal() {
+  renderRatesPanel();
+  document.getElementById('rates-modal-overlay').classList.add('open');
+}
+
+function closeRatesModal(e) {
+  if (e && e.target !== document.getElementById('rates-modal-overlay')) return;
+  document.getElementById('rates-modal-overlay').classList.remove('open');
 }

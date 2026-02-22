@@ -39,6 +39,21 @@ title: Sticker Commission Form
     </div>
   </header>
 
+  <details class="instructions-section panel" open>
+    <summary>
+      <span class="instructions-title">📖 How to use this form</span>
+      <span class="instructions-chevron">▾</span>
+    </summary>
+    <ol class="instructions-list">
+      <li><strong>Fill in Pack Details</strong> — give your pack a name, add your username, and describe your character(s). Attach any reference sheets here too.</li>
+      <li><strong>Add Sections</strong> — use <em>Add Section</em> to categorize your stickers (e.g. "Emotions", "Memes").</li>
+      <li><strong>Add Stickers</strong> — inside each section, use <em>Add Sticker</em> to describe each individual sticker. Give it a name, a pose or action, and any extra notes or reference images.</li>
+      <li><strong>Export</strong> — when you're done, hit <strong>💾 Export</strong> in the toolbar at the bottom to save a <code>.json</code> file, then send it to your artist.</li>
+    </ol>
+    <p class="instructions-tip">💡 <strong>Tip:</strong> You can import a previously saved <code>.json</code> at any time with the <strong>📂 Import</strong> button, and your progress is automatically saved in your browser.</p>
+    <p class="instructions-tip">⚠️ <strong>Note:</strong> Unless explicitly told by your artist, YCH characters do not apply to the 'Multiple Characters' flag. I.e. if your sticker has three characters and one is YCH, it should be flagged as 'Multiple Characters (2)' and 'YCH'</p>
+  </details>
+
   <div class="meta-section panel">
     <h2>📋 Pack Details</h2>
     <div class="meta-grid">
@@ -67,7 +82,7 @@ If you have multiple characters, it's recommended to create separate packs or se
           ondragleave="onDragLeave(event,'char')"
           ondrop="onDropChar(event)">
           <span class="drop-icon">🖼</span>
-          <span class="drop-hint">Click or drag character sheets / references here</span>
+          <span class="drop-hint">Click or drag general references here</span>
         </div>
         <div class="url-input-row">
           <input class="url-image-input" type="url" placeholder="Or paste an image URL…"
