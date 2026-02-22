@@ -62,9 +62,23 @@ function renderStats() {
   });
 
   // Combos
-  const nsfwYch   = stickers.filter(s => s.nsfw  && s.ych && !s.multiChar).length;
-  const nsfwMulti = stickers.filter(s => s.nsfw  && s.multiChar && !s.ych).length;
-  const ychMulti  = stickers.filter(s => s.ych   && s.multiChar && !s.nsfw).length;
+  const nsfwYch = stickers.filter(s => s.nsfw && s.ych && !s.multiChar).length;
+
+  // NSFW+Multi — broken down by charCount
+  const nsfwMultiCounts = {};
+  stickers.filter(s => s.nsfw && s.multiChar && !s.ych).forEach(s => {
+    const n = s.charCount || 2;
+    nsfwMultiCounts[n] = (nsfwMultiCounts[n] || 0) + 1;
+  });
+  const nsfwMultiTotal = Object.values(nsfwMultiCounts).reduce((a, b) => a + b, 0);
+
+  // YCH+Multi — broken down by charCount
+  const ychMultiCounts = {};
+  stickers.filter(s => s.ych && s.multiChar && !s.nsfw).forEach(s => {
+    const n = s.charCount || 2;
+    ychMultiCounts[n] = (ychMultiCounts[n] || 0) + 1;
+  });
+  const ychMultiTotal = Object.values(ychMultiCounts).reduce((a, b) => a + b, 0);
 
   // All three — broken down by charCount
   const allThreeCounts = {};
@@ -92,6 +106,16 @@ function renderStats() {
     .map(([n, count]) => pill(`All three ${n}×`, count, 'flamingo'))
     .join('');
 
+  const nsfwMultiPills = Object.entries(nsfwMultiCounts)
+    .sort(([a],[b]) => a - b)
+    .map(([n, count]) => pill(`NSFW+Multi ${n}×`, count, 'mauve'))
+    .join('');
+
+  const ychMultiPills = Object.entries(ychMultiCounts)
+    .sort(([a],[b]) => a - b)
+    .map(([n, count]) => pill(`YCH+Multi ${n}×`, count, 'teal'))
+    .join('');
+
   bar.innerHTML = `
     <div class="stats-progress">
       <span class="stats-done-label">${done}/${total} done</span>
@@ -106,10 +130,10 @@ function renderStats() {
       ${pill('YCH', ych, 'blue')}
       ${multiPills}
       ${pill('NSFW+YCH', nsfwYch, 'maroon')}
-      ${pill('NSFW+Multi', nsfwMulti, 'mauve')}
-      ${pill('YCH+Multi', ychMulti, 'teal')}
+      ${nsfwMultiPills}
+      ${ychMultiPills}
       ${allThreePills}
-      ${!standard && !nsfw && !ych && !multi.length && !nsfwYch && !nsfwMulti && !ychMulti && !allThreeTotal ? '<span style="color:var(--overlay0);font-size:0.82rem;font-style:italic;">No flags set.</span>' : ''}
+      ${!standard && !nsfw && !ych && !multi.length && !nsfwYch && !nsfwMultiTotal && !ychMultiTotal && !allThreeTotal ? '<span style="color:var(--overlay0);font-size:0.82rem;font-style:italic;">No flags set.</span>' : ''}
     </div>`;
 }
 

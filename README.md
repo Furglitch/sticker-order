@@ -19,7 +19,7 @@ Customers can use this app to fill out a Sticker Order Form for their sticker co
 Artists can use this app to easily view Sticker Order Sheets sent by customers.
 
 - View sticker details in a clear, organised format
-- View reference images in a lightbox preview
+- View reference images in a lightbox preview (click to enlarge)
 - Checklist functionality to keep track of completed stickers
 - Number of stickers per 'toggle' (NSFW, YCH, multi-character) is clearly indicated to help with pricing and workload estimation
   - Artists can additionaly edit the toggles as they work through the order, for example to mark a sticker as NSFW if the customer hasn't specified it but the artist thinks it would be appropriate
