@@ -69,26 +69,31 @@ function renderStats() {
     multiOnlyCounts[n] = (multiOnlyCounts[n] || 0) + 1;
   });
 
-  const nsfwYch = stickers.filter(s => s.nsfw && s.ych && !s.multiChar).length;
+  const nsfwYchCounts = {};
+  stickers.filter(s => s.nsfw && s.ych && !s.multiChar).forEach(s => {
+    const key = `${s.nsfwCharCount || 1}_${s.ychCount || 1}`;
+    nsfwYchCounts[key] = (nsfwYchCounts[key] || 0) + 1;
+  });
+  const nsfwYchTotal = Object.values(nsfwYchCounts).reduce((a, b) => a + b, 0);
 
   const nsfwMultiCounts = {};
   stickers.filter(s => s.nsfw && s.multiChar && !s.ych).forEach(s => {
-    const n = s.charCount || 1;
-    nsfwMultiCounts[n] = (nsfwMultiCounts[n] || 0) + 1;
+    const key = `${s.nsfwCharCount || 1}_${s.charCount || 1}`;
+    nsfwMultiCounts[key] = (nsfwMultiCounts[key] || 0) + 1;
   });
   const nsfwMultiTotal = Object.values(nsfwMultiCounts).reduce((a, b) => a + b, 0);
 
   const ychMultiCounts = {};
   stickers.filter(s => s.ych && s.multiChar && !s.nsfw).forEach(s => {
-    const n = s.charCount || 1;
-    ychMultiCounts[n] = (ychMultiCounts[n] || 0) + 1;
+    const key = `${s.ychCount || 1}_${s.charCount || 1}`;
+    ychMultiCounts[key] = (ychMultiCounts[key] || 0) + 1;
   });
   const ychMultiTotal = Object.values(ychMultiCounts).reduce((a, b) => a + b, 0);
 
   const allThreeCounts = {};
   stickers.filter(s => s.nsfw && s.ych && s.multiChar).forEach(s => {
-    const n = s.charCount || 1;
-    allThreeCounts[n] = (allThreeCounts[n] || 0) + 1;
+    const key = `${s.nsfwCharCount || 1}_${s.ychCount || 1}_${s.charCount || 1}`;
+    allThreeCounts[key] = (allThreeCounts[key] || 0) + 1;
   });
   const allThreeTotal = Object.values(allThreeCounts).reduce((a, b) => a + b, 0);
 
@@ -115,26 +120,31 @@ function renderStats() {
     .map(([n, count]) => pill(`Add ${n}×`, count, 'green'))
     .join('');
 
+  const nsfwYchPills = Object.entries(nsfwYchCounts)
+    .sort(([a],[b]) => { const [an,am]=a.split('_').map(Number),[bn,bm]=b.split('_').map(Number); return an-bn||am-bm; })
+    .map(([key, count]) => { const [nsfwN,ychN]=key.split('_'); return pill(`NSFW ${nsfwN}× + YCH ${ychN}×`, count, 'maroon'); })
+    .join('');
+
   const nsfwMultiPills = Object.entries(nsfwMultiCounts)
-    .sort(([a],[b]) => a - b)
-    .map(([n, count]) => pill(`NSFW+Add ${n}×`, count, 'mauve'))
+    .sort(([a],[b]) => { const [an,am]=a.split('_').map(Number),[bn,bm]=b.split('_').map(Number); return an-bn||am-bm; })
+    .map(([key, count]) => { const [nsfwN,multiN]=key.split('_'); return pill(`NSFW ${nsfwN}× + Add ${multiN}×`, count, 'mauve'); })
     .join('');
 
   const ychMultiPills = Object.entries(ychMultiCounts)
-    .sort(([a],[b]) => a - b)
-    .map(([n, count]) => pill(`YCH+Add ${n}×`, count, 'teal'))
+    .sort(([a],[b]) => { const [an,am]=a.split('_').map(Number),[bn,bm]=b.split('_').map(Number); return an-bn||am-bm; })
+    .map(([key, count]) => { const [ychN,multiN]=key.split('_'); return pill(`YCH ${ychN}× + Add ${multiN}×`, count, 'teal'); })
     .join('');
 
   const allThreePills = Object.entries(allThreeCounts)
-    .sort(([a],[b]) => a - b)
-    .map(([n, count]) => pill(`All 3 ${n}×`, count, 'flamingo'))
+    .sort(([a],[b]) => { const [an,am,ak]=a.split('_').map(Number),[bn,bm,bk]=b.split('_').map(Number); return an-bn||am-bm||ak-bk; })
+    .map(([key, count]) => { const [nsfwN,ychN,multiN]=key.split('_'); return pill(`NSFW ${nsfwN}× + YCH ${ychN}× + Add ${multiN}×`, count, 'flamingo'); })
     .join('');
 
   const nsfwOnlyTotal = Object.values(nsfwOnlyCounts).reduce((a, b) => a + b, 0);
   const ychOnlyTotal  = Object.values(ychOnlyCounts).reduce((a, b) => a + b, 0);
   const multiOnlyTotal = Object.values(multiOnlyCounts).reduce((a, b) => a + b, 0);
   const isEmpty = !standard && !nsfwOnlyTotal && !ychOnlyTotal && !multiOnlyTotal
-                  && !nsfwYch && !nsfwMultiTotal && !ychMultiTotal && !allThreeTotal;
+                  && !nsfwYchTotal && !nsfwMultiTotal && !ychMultiTotal && !allThreeTotal;
 
   const hasRates = hasAnyRates();
   let totalHTML = '';
@@ -159,7 +169,7 @@ function renderStats() {
       ${nsfwPills}
       ${ychPills}
       ${multiPills}
-      ${pill('NSFW+YCH', nsfwYch, 'maroon')}
+      ${nsfwYchPills}
       ${nsfwMultiPills}
       ${ychMultiPills}
       ${allThreePills}
