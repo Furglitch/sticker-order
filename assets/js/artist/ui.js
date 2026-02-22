@@ -1,5 +1,6 @@
 function renderAll() {
   renderSidebar();
+  renderRatesPanel();
   renderCommissionView();
 }
 
@@ -116,6 +117,25 @@ function renderStats() {
     .map(([n, count]) => pill(`YCH+Multi ${n}×`, count, 'teal'))
     .join('');
 
+  // Pricing total
+  const r = artistData.rates || {};
+  const hasRates = (parseFloat(r.base) || 0) + (parseFloat(r.nsfw) || 0) +
+                   (parseFloat(r.multiChar) || 0) + (parseFloat(r.ych) || 0) > 0;
+  let totalHTML = '';
+  if (hasRates) {
+    const orderTotal = stickers.reduce((sum, s) => {
+      let price = parseFloat(r.base) || 0;
+      if (s.nsfw)      price += parseFloat(r.nsfw)     || 0;
+      if (s.ych)       price += parseFloat(r.ych)      || 0;
+      if (s.multiChar) price += (Math.max(s.charCount || 2, 2) - 1) * (parseFloat(r.multiChar) || 0);
+      return sum + price;
+    }, 0);
+    totalHTML = `<div class="stats-total">
+      <span>Est. Total</span>
+      <span class="stats-total-amount">$${orderTotal.toFixed(2)}</span>
+    </div>`;
+  }
+
   bar.innerHTML = `
     <div class="stats-progress">
       <span class="stats-done-label">${done}/${total} done</span>
@@ -134,7 +154,8 @@ function renderStats() {
       ${ychMultiPills}
       ${allThreePills}
       ${!standard && !nsfw && !ych && !multi.length && !nsfwYch && !nsfwMultiTotal && !ychMultiTotal && !allThreeTotal ? '<span style="color:var(--overlay0);font-size:0.82rem;font-style:italic;">No flags set.</span>' : ''}
-    </div>`;
+    </div>
+    ${totalHTML}`;
 }
 
 
@@ -354,4 +375,48 @@ function sectionLetterArtist(i) {
 
 function toggleSidebar() {
   document.getElementById('artist-sidebar').classList.toggle('open');
+}
+
+
+function renderRatesPanel() {
+  const el = document.getElementById('rates-panel');
+  if (!el) return;
+  const r = artistData.rates || {};
+  const val = key => (r[key] > 0 ? r[key] : '');
+
+  const rateInput = (key, label) => `
+    <div class="rate-row">
+      <label class="rate-label">${label}</label>
+      <div class="rate-input-wrap">
+        <span class="rate-currency">$</span>
+        <input class="rate-input" type="number" min="0" step="0.01" placeholder="0.00"
+          value="${val(key)}"
+          oninput="setRate('${key}', this.value)">
+      </div>
+    </div>`;
+
+  const collapsed = localStorage.getItem('ratesPanelCollapsed') === 'true';
+
+  el.innerHTML = `
+    <div class="rates-section">
+      <button class="rates-toggle" onclick="toggleRatesPanel()" title="Toggle pricing">
+        💰 Pricing
+        <span class="rates-chevron${collapsed ? ' rotated' : ''}">▾</span>
+      </button>
+      <div class="rates-inputs${collapsed ? ' collapsed' : ''}">
+        ${rateInput('base',     'Standard / sticker')}
+        ${rateInput('nsfw',     'NSFW upcharge')}
+        ${rateInput('multiChar','Additional character')}
+        ${rateInput('ych',      'YCH upcharge')}
+      </div>
+    </div>`;
+}
+
+function toggleRatesPanel() {
+  const panel  = document.getElementById('rates-panel');
+  const inputs = panel.querySelector('.rates-inputs');
+  const chev   = panel.querySelector('.rates-chevron');
+  const isNowCollapsed = inputs.classList.toggle('collapsed');
+  chev.classList.toggle('rotated', isNowCollapsed);
+  localStorage.setItem('ratesPanelCollapsed', String(isNowCollapsed));
 }

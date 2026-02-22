@@ -1,6 +1,6 @@
 const STORAGE_KEY = 'stickerArtistData';
 
-let artistData = { activeId: null, commissions: {} };
+let artistData = { activeId: null, commissions: {}, rates: { base: 0, nsfw: 0, multiChar: 0, ych: 0 } };
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(artistData));
@@ -9,9 +9,12 @@ function saveState() {
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) artistData = JSON.parse(raw);
+    if (raw) {
+      artistData = JSON.parse(raw);
+      if (!artistData.rates) artistData.rates = { base: 0, nsfw: 0, multiChar: 0, ych: 0 };
+    }
   } catch {
-    artistData = { activeId: null, commissions: {} };
+    artistData = { activeId: null, commissions: {}, rates: { base: 0, nsfw: 0, multiChar: 0, ych: 0 } };
   }
 }
 

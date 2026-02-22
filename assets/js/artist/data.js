@@ -141,3 +141,10 @@ function setFlag(commId, sid, cid, flag, val) {
 function setArtistNotes(commId, sid, cid, text) {
   updateSticker(commId, sid, cid, { artistNotes: text });
 }
+
+function setRate(key, val) {
+  if (!artistData.rates) artistData.rates = {};
+  artistData.rates[key] = parseFloat(val) || 0;
+  saveState();
+  renderStats();
+}
