@@ -155,6 +155,7 @@ function renderMetaBlock(comm) {
   el.innerHTML = `
     <div class="meta-block panel">
       <h2 class="block-heading">📋 Pack Details</h2>
+      ${row('Username', m.username)}
       ${row('Character', m.character)}
       ${row('Description', m.desc)}
       ${row('Style', m.style)}
