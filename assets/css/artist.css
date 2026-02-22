@@ -439,20 +439,22 @@
 }
 
 .artist-card-list {
-  background: var(--mantle);
+  background: var(--base);
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 8px;
+  padding: 12px;
   transition: background 0.25s;
 }
 
 
 .artist-card {
-  border-bottom: 1.5px solid var(--surface1);
+  background: var(--mantle);
+  border: 1.5px solid var(--surface1);
+  border-radius: 10px;
+  overflow: hidden;
   transition: background 0.2s, border-color 0.25s, opacity 0.25s;
 }
-
-.artist-card:last-child { border-bottom: none; }
 
 .artist-card.is-done {
   opacity: 0.55;
