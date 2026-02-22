@@ -52,19 +52,19 @@ function renderStats() {
   const standard = stickers.filter(s => !s.nsfw && !s.ych && !s.multiChar).length;
 
   const nsfwOnlyCounts = {};
-  stickers.filter(s => s.nsfw).forEach(s => {
+  stickers.filter(s => s.nsfw && !s.ych && !s.multiChar).forEach(s => {
     const n = s.nsfwCharCount || 1;
     nsfwOnlyCounts[n] = (nsfwOnlyCounts[n] || 0) + 1;
   });
 
   const ychOnlyCounts = {};
-  stickers.filter(s => s.ych).forEach(s => {
+  stickers.filter(s => s.ych && !s.nsfw && !s.multiChar).forEach(s => {
     const n = s.ychCount || 1;
     ychOnlyCounts[n] = (ychOnlyCounts[n] || 0) + 1;
   });
 
   const multiOnlyCounts = {};
-  stickers.filter(s => s.multiChar).forEach(s => {
+  stickers.filter(s => s.multiChar && !s.nsfw && !s.ych).forEach(s => {
     const n = s.charCount || 1;
     multiOnlyCounts[n] = (multiOnlyCounts[n] || 0) + 1;
   });
